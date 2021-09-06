@@ -60,14 +60,14 @@ namespace DirectOSC {
 	}
 
 	//oscpackを初期化し、受信処理を登録する。受信スレッドを立てる
-	void OSC::Open(osc::OscPacketListener* listen, int portRx,int portTx)
+	void OSC::Open(osc::OscPacketListener* listen, int portRx, std::string addressTx, int portTx)
 	{
 		if (m_opened) {
 			return;
 		}
 		this->listener = listen;
 		socketRx = new UdpListeningReceiveSocket(IpEndpointName(IpEndpointName::ANY_ADDRESS, portRx), listener);
-		socketTx = new UdpTransmitSocket(IpEndpointName("127.0.0.1", portTx));
+		socketTx = new UdpTransmitSocket(IpEndpointName(addressTx.c_str(), portTx));
 
 		Thread = new std::thread(ThreadWorker);
 		m_opened = true;

@@ -37,6 +37,7 @@ namespace VMTDriver {
 		Eigen::Matrix4d m_RoomToDriverMatrix = Eigen::Matrix4d::Identity();
 		bool m_velocityEnable = false;
 		int m_receivePort = 39570;
+		std::string m_sendIP = "127.0.0.1";
 		int m_sendPort = 39571;
 		bool m_optoutTrackingRole = true;
 		bool m_HMDisIndex0 = true;
@@ -73,6 +74,7 @@ namespace VMTDriver {
 		Eigen::Matrix4d& GetRoomToDriverMatrix();
 		bool GetVelocityEnable();
 		int GetReceivePort();
+		std::string GetSendIp();
 		int GetSendPort();
 		bool GetOptoutTrackingRole();
 		bool GetHMDisIndex0();

@@ -316,7 +316,7 @@ namespace VMTDriver {
 		TrackedDeviceServerDriver::SetAutoUpdate(config->GetDefaultAutoPoseUpdateOn());
 
 		//通信ポートオープン
-		DirectOSC::OSC::GetInstance()->Open(&m_rcv, config->GetReceivePort(), config->GetSendPort());
+		DirectOSC::OSC::GetInstance()->Open(&m_rcv, config->GetReceivePort(), config->GetSendIp(), config->GetSendPort());
 		m_opened = true;
 	}
 	//通信のクローズ
