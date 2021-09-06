@@ -112,6 +112,10 @@ namespace VMTDriver {
 		{
 			j["ReceivePort"] = -1;
 		}
+		if (!j.contains("SendIp"))
+		{
+			j["SendIp"] = "127.0.0.1";
+		}
 		if (!j.contains("SendPort"))
 		{
 			j["SendPort"] = -1;
@@ -160,6 +164,10 @@ namespace VMTDriver {
 				if (j["ReceivePort"] > 0) {
 					m_receivePort = j["ReceivePort"];
 				}
+			}
+			if (j.contains("SendIp"))
+			{
+				m_sendIP = j["SendIp"];
 			}
 			if (j.contains("SendPort"))
 			{
@@ -219,6 +227,11 @@ namespace VMTDriver {
 	int Config::GetReceivePort()
 	{
 		return m_receivePort;
+	}
+
+	std::string Config::GetSendIp()
+	{
+		return m_sendIP;
 	}
 
 	//送信ポートの取得
