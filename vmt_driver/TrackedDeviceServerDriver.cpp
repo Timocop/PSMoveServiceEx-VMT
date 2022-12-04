@@ -355,23 +355,33 @@ namespace VMTDriver {
     {
         if (!m_alreadyRegistered)
         {
-            switch (type)
+            // $TODO: Add oculus/index emulation
+			switch (type)
             {
-			case 7://HTC Vive Wand Emulation
+			case 8://TrackingReference (HTC Basestation Emulation)
+				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcLighthouse;
+
+				if (Config::GetInstance()->GetOptoutTrackingRole()) {
+					VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
+				}
+				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_TrackingReference, this);
+				m_alreadyRegistered = true;
+				break;
+			case 7://Controller Right (HTC Vive Wand Emulation)
 				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcViveControllerR;
 
 				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_RightHand);
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
 				m_alreadyRegistered = true;
 				break;
-			case 6://HTC Vive Wand Emulation
+			case 6://Controller Left (HTC Vive Wand Emulation)
 				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcViveControllerL;
 
 				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_LeftHand);
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
 				m_alreadyRegistered = true;
 				break;
-			case 5://HTC Vive Tracker Emulation
+			case 5://Tracker (HTC Vive Tracker Emulation)
 				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcViveTracker;
 
 				if (Config::GetInstance()->GetOptoutTrackingRole()) {
@@ -543,6 +553,33 @@ namespace VMTDriver {
 
 		switch (m_emulatedDeviceType)
 		{
+		case eEmulatedDeviceType::DeviceType_HtcLighthouse:
+		{
+			std::string registeredDeviceType = Config::GetInstance()->GetDriverName();
+			registeredDeviceType += "/";
+			registeredDeviceType += m_serial.c_str();
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, registeredDeviceType.c_str());
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ModelNumber_String, m_serial.c_str());
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, m_serial.c_str());
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "VirtualMotionTracker");
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RenderModelName_String, "lh_basestation_vive");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ManufacturerName_String, "VirtualMotionTracker");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ResourceRoot_String, "lighthouse");
+			VRProperties()->SetInt32Property(m_propertyContainer, Prop_DeviceClass_Int32, TrackedDeviceClass_TrackingReference);
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceOff_String, "{lighthouse}/icons/base_status_off.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearching_String, "{lighthouse}/icons/base_status_searching.gif");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearchingAlert_String, "{lighthouse}/icons/base_status_searching_alert.gif");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReady_String, "{lighthouse}/icons/base_status_ready.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReadyAlert_String, "{lighthouse}/icons/base_status_ready_alert.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceNotReady_String, "{lighthouse}/icons/base_status_error.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceStandby_String, "{lighthouse}/icons/base_status_standby.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceAlertLow_String, "{lighthouse}/icons/base_status_ready_low.png");
+
+			break;
+		}
 		case eEmulatedDeviceType::DeviceType_HtcViveControllerL:
 		case eEmulatedDeviceType::DeviceType_HtcViveControllerR:
 		{
@@ -571,6 +608,7 @@ namespace VMTDriver {
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_WillDriftInYaw_Bool, false);
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DeviceIsWireless_Bool, true);
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DeviceIsCharging_Bool, false);
+			VRProperties()->SetFloatProperty(m_propertyContainer, Prop_DeviceBatteryPercentage_Float, 1.f);
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_UpdateAvailable_Bool, false);
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_ManualUpdate_Bool, false);
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DeviceProvidesBatteryStatus_Bool, true);

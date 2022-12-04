@@ -65,7 +65,8 @@ namespace VMTDriver {
 		DeviceType_Vmt,
 		DeviceType_HtcViveTracker,
 		DeviceType_HtcViveControllerL,
-		DeviceType_HtcViveControllerR
+		DeviceType_HtcViveControllerR,
+		DeviceType_HtcLighthouse
 	};
 
 	enum class ReferMode_t {
