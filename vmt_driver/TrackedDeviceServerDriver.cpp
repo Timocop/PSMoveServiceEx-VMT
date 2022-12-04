@@ -357,7 +357,21 @@ namespace VMTDriver {
         {
             switch (type)
             {
-			case 5://Vive Tracker Emulation
+			case 7://HTC Vive Wand Emulation
+				m_emulatedDeviceType = eEmulatedDeviceType::HtcViveControllerR;
+
+				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_RightHand);
+				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
+				m_alreadyRegistered = true;
+				break;
+			case 6://HTC Vive Wand Emulation
+				m_emulatedDeviceType = eEmulatedDeviceType::HtcViveControllerL;
+
+				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_LeftHand);
+				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
+				m_alreadyRegistered = true;
+				break;
+			case 5://HTC Vive Tracker Emulation
 				m_emulatedDeviceType = eEmulatedDeviceType::HtcViveTracker;
 
 				if (Config::GetInstance()->GetOptoutTrackingRole()) {
@@ -521,6 +535,73 @@ namespace VMTDriver {
 
 		switch (m_emulatedDeviceType)
 		{
+		case eEmulatedDeviceType::HtcViveControllerL:
+		case eEmulatedDeviceType::HtcViveControllerR:
+		{
+			if (m_emulatedDeviceType == eEmulatedDeviceType::HtcViveControllerL)
+			{
+				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_LeftHand);
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, "htc/vive_controllerLHR-F94B3BD8");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, "LHR-F94B3BD8");
+			}
+			else
+			{
+				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_RightHand);
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, "htc/vive_controllerLHR-F94B3BD9");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, "LHR-F94B3BD9");
+			}
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "VirtualMotionTracker");
+
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_WillDriftInYaw_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DeviceIsWireless_Bool, true);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DeviceIsCharging_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_UpdateAvailable_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_ManualUpdate_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DeviceProvidesBatteryStatus_Bool, true);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DeviceCanPowerOff_Bool, true);
+			VRProperties()->SetInt32Property(m_propertyContainer, Prop_DeviceClass_Int32, TrackedDeviceClass_Controller);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_ForceUpdateRequired_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Identifiable_Bool, true);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_RemindUpdate_Bool, false);
+			VRProperties()->SetInt32Property(m_propertyContainer, Prop_Axis0Type_Int32, k_eControllerAxis_TrackPad);
+			VRProperties()->SetInt32Property(m_propertyContainer, Prop_Axis1Type_Int32, k_eControllerAxis_Trigger);
+
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasDisplayComponent_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasCameraComponent_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasDriverDirectModeComponent_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasVirtualDisplayComponent_Bool, false);
+			VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerHandSelectionPriority_Int32, 0);
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ModelNumber_String, "Vive. Controller MV");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RenderModelName_String, "vr_controller_vive_1_5");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ManufacturerName_String, "HTC");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ResourceRoot_String, "htc");
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_InputProfilePath_String, "{htc}/input/vive_controller_profile.json");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceOff_String, "{htc}/icons/controller_status_off.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearching_String, "{htc}/icons/controller_status_searching.gif");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearchingAlert_String, "{htc}/icons/controller_status_searching_alert.gif");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReady_String, "{htc}/icons/controller_status_ready.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReadyAlert_String, "{htc}/icons/controller_status_ready_alert.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceNotReady_String, "{htc}/icons/controller_status_error.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceStandby_String, "{htc}/icons/controller_status_off.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceAlertLow_String, "{htc}/icons/controller_status_ready_low.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ControllerType_String, "vive_controller");
+
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/system/click", &ButtonComponent[0]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trigger/click", &ButtonComponent[1]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trackpad/touch", &ButtonComponent[2]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trackpad/click", &ButtonComponent[3]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/grip/click", &ButtonComponent[4]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/application_menu/click", &ButtonComponent[5]);
+
+			VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/trigger/value", &TriggerComponent[0], VRScalarType_Absolute, VRScalarUnits_NormalizedOneSided);
+			VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/trackpad/x", &JoystickComponent[0], VRScalarType_Absolute, VRScalarUnits_NormalizedTwoSided);
+			VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/trackpad/y", &JoystickComponent[1], VRScalarType_Absolute, VRScalarUnits_NormalizedTwoSided);
+
+			VRDriverInput()->CreateHapticComponent(m_propertyContainer, "/output/haptic", &HapticComponent);
+			break;
+		}
 		case eEmulatedDeviceType::HtcViveTracker:
 		{
 			VRProperties()->SetUint64Property(m_propertyContainer, Prop_CurrentUniverseId_Uint64, 2);
@@ -571,7 +652,6 @@ namespace VMTDriver {
 
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Identifiable_Bool, false);
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_RemindUpdate_Bool, false);
-			VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_Invalid);
 			VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerHandSelectionPriority_Int32, -1);
 
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceOff_String, "{htc}/icons/tracker_status_off.png");

@@ -55,7 +55,8 @@ namespace VMTDriver {
 		{
 			Vmt,
 			HtcViveTracker,
-			HtcViveCOntroller
+			HtcViveControllerL,
+			HtcViveControllerR
 		};
 		eEmulatedDeviceType m_emulatedDeviceType = eEmulatedDeviceType::Vmt;
         bool m_alreadyRegistered = false;
