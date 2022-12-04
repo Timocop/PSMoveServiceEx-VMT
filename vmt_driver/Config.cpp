@@ -132,6 +132,50 @@ namespace VMTDriver {
 		{
 			j["DefaultAutoPoseUpdateOn"] = true;
 		}
+		if (!j.contains("DriverName"))
+		{
+			j["DriverName"] = "vmt";
+		}
+		if (!j.contains("DefaultRenderModelPrefix"))
+		{
+			j["DefaultRenderModelPrefix"] = "vmt";
+		}
+		if (!j.contains("GenericTrackerRenderModelPrefix"))
+		{
+			j["GenericTrackerRenderModelPrefix"] = "vmt";
+		}
+		if (!j.contains("LeftControllerRenderModelPrefix"))
+		{
+			j["LeftControllerRenderModelPrefix"] = "vmt";
+		}
+		if (!j.contains("RightControllerRenderModelPrefix"))
+		{
+			j["RightControllerRenderModelPrefix"] = "vmt";
+		}
+		if (!j.contains("TrackingReferenceRenderModelPrefix"))
+		{
+			j["TrackingReferenceRenderModelPrefix"] = "vmt";
+		}
+		if (!j.contains("DefaultIconPrefix"))
+		{
+			j["DefaultIconPrefix"] = "vmt";
+		}
+		if (!j.contains("GenericTrackerIconPrefix"))
+		{
+			j["GenericTrackerIconPrefix"] = "vmt";
+		}
+		if (!j.contains("LeftControllerIconPrefix"))
+		{
+			j["LeftControllerIconPrefix"] = "vmt";
+		}
+		if (!j.contains("RightControllerIconPrefix"))
+		{
+			j["RightControllerIconPrefix"] = "vmt";
+		}
+		if (!j.contains("TrackingReferenceIconPrefix"))
+		{
+			j["TrackingReferenceIconPrefix"] = "vmt";
+		}
 		return j;
 	}
 
@@ -182,6 +226,50 @@ namespace VMTDriver {
 			if (j.contains("DefaultAutoPoseUpdateOn"))
 			{
 				m_DefaultAutoPoseUpdateOn = j["DefaultAutoPoseUpdateOn"];
+			}
+			if (j.contains("DriverName"))
+			{
+				m_DriverName = j["DriverName"];
+			}
+			if (j.contains("DefaultRenderModelPrefix"))
+			{
+				m_DefaultRenderModelPrefix = j["DefaultRenderModelPrefix"];
+			}
+			if (j.contains("GenericTrackerRenderModelPrefix"))
+			{
+				m_GenericTrackerRenderModelPrefix = j["GenericTrackerRenderModelPrefix"];
+			}
+			if (j.contains("LeftControllerRenderModelPrefix"))
+			{
+				m_LeftControllerRenderModelPrefix = j["LeftControllerRenderModelPrefix"];
+			}
+			if (j.contains("RightControllerRenderModelPrefix"))
+			{
+				m_RightControllerRenderModelPrefix = j["RightControllerRenderModelPrefix"];
+			}
+			if (j.contains("TrackingReferenceRenderModelPrefix"))
+			{
+				m_TrackingReferenceRenderModelPrefix = j["TrackingReferenceRenderModelPrefix"];
+			}
+			if (j.contains("DefaultIconPrefix"))
+			{
+				m_DefaultIconPrefix = j["DefaultIconPrefix"];
+			}
+			if (j.contains("GenericTrackerIconPrefix"))
+			{
+				m_GenericTrackerIconPrefix = j["GenericTrackerIconPrefix"];
+			}
+			if (j.contains("LeftControllerIconPrefix"))
+			{
+				m_LeftControllerIconPrefix = j["LeftControllerIconPrefix"];
+			}
+			if (j.contains("RightControllerIconPrefix"))
+			{
+				m_RightControllerIconPrefix = j["RightControllerIconPrefix"];
+			}
+			if (j.contains("TrackingReferenceIconPrefix"))
+			{
+				m_TrackingReferenceIconPrefix = j["TrackingReferenceIconPrefix"];
 			}
 		}
 		catch (...) {
@@ -272,5 +360,64 @@ namespace VMTDriver {
 	bool Config::GetDefaultAutoPoseUpdateOn()
 	{
 		return m_DefaultAutoPoseUpdateOn;
+	}
+
+	std::string Config::GetDriverName()
+	{
+		return m_DriverName;
+	}
+
+	std::string Config::GetRessourceRenderModelPrefix(eRessourceType type)
+	{
+		switch (type)
+		{
+		case eRessourceType::RessourceType_GenericTracker:
+		{
+			return m_GenericTrackerRenderModelPrefix;
+		}
+		case eRessourceType::RessourceType_LeftController:
+		{
+			return m_LeftControllerRenderModelPrefix;
+		}
+		case eRessourceType::RessourceType_RightController:
+		{
+			return m_RightControllerRenderModelPrefix;
+		}
+		case eRessourceType::RessourceType_TrackingReference:
+		{
+			return m_TrackingReferenceRenderModelPrefix;
+		}
+		default:
+		{
+			return m_DefaultRenderModelPrefix;
+		}
+		}
+	}
+
+	std::string Config::GetRessourceIconPrefix(eRessourceType type)
+	{
+		switch (type)
+		{
+		case eRessourceType::RessourceType_GenericTracker:
+		{
+			return m_GenericTrackerIconPrefix;
+		}
+		case eRessourceType::RessourceType_LeftController:
+		{
+			return m_LeftControllerIconPrefix;
+		}
+		case eRessourceType::RessourceType_RightController:
+		{
+			return m_RightControllerIconPrefix;
+		}
+		case eRessourceType::RessourceType_TrackingReference:
+		{
+			return m_TrackingReferenceIconPrefix;
+		}
+		default:
+		{
+			return m_DefaultIconPrefix;
+		}
+		}
 	}
 }

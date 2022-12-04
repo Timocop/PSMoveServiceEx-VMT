@@ -42,6 +42,17 @@ namespace VMTDriver {
 		bool m_HMDisIndex0 = true;
 		bool m_RejectWhenCannotTracking = true;
 		bool m_DefaultAutoPoseUpdateOn = true;
+		std::string m_DriverName = "vmt";
+		std::string m_DefaultRenderModelPrefix = "vmt";
+		std::string m_GenericTrackerRenderModelPrefix = "vmt";
+		std::string m_LeftControllerRenderModelPrefix = "vmt";
+		std::string m_RightControllerRenderModelPrefix = "vmt";
+		std::string m_TrackingReferenceRenderModelPrefix = "vmt";
+		std::string m_DefaultIconPrefix = "vmt";
+		std::string m_GenericTrackerIconPrefix = "vmt";
+		std::string m_LeftControllerIconPrefix = "vmt";
+		std::string m_RightControllerIconPrefix = "vmt";
+		std::string m_TrackingReferenceIconPrefix = "vmt";
 
 		json LoadJson();
 		void SaveJson(json j);
@@ -66,5 +77,8 @@ namespace VMTDriver {
 		bool GetHMDisIndex0();
 		bool GetRejectWhenCannotTracking();
 		bool GetDefaultAutoPoseUpdateOn();
+		std::string GetDriverName();
+		std::string GetRessourceRenderModelPrefix(eRessourceType type);
+		std::string GetRessourceIconPrefix(eRessourceType type);
 	};
 }

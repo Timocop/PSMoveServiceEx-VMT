@@ -358,21 +358,21 @@ namespace VMTDriver {
             switch (type)
             {
 			case 7://HTC Vive Wand Emulation
-				m_emulatedDeviceType = eEmulatedDeviceType::HtcViveControllerR;
+				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcViveControllerR;
 
 				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_RightHand);
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
 				m_alreadyRegistered = true;
 				break;
 			case 6://HTC Vive Wand Emulation
-				m_emulatedDeviceType = eEmulatedDeviceType::HtcViveControllerL;
+				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcViveControllerL;
 
 				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_LeftHand);
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
 				m_alreadyRegistered = true;
 				break;
 			case 5://HTC Vive Tracker Emulation
-				m_emulatedDeviceType = eEmulatedDeviceType::HtcViveTracker;
+				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcViveTracker;
 
 				if (Config::GetInstance()->GetOptoutTrackingRole()) {
 					VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
@@ -381,6 +381,8 @@ namespace VMTDriver {
 				m_alreadyRegistered = true;
 				break;
 			case 4://TrackingReference
+				m_ressourceType = eRessourceType::RessourceType_TrackingReference;
+
 				if (Config::GetInstance()->GetOptoutTrackingRole()) {
 					VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
 				}
@@ -388,16 +390,22 @@ namespace VMTDriver {
 				m_alreadyRegistered = true;
 				break;
             case 3://Controller Right
+				m_ressourceType = eRessourceType::RessourceType_RightController;
+
                 VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_RightHand);
                 VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
                 m_alreadyRegistered = true;
                 break;
             case 2://Controller Left
+				m_ressourceType = eRessourceType::RessourceType_LeftController;
+
                 VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_LeftHand);
                 VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
                 m_alreadyRegistered = true;
                 break;
             case 1://Tracker
+				m_ressourceType = eRessourceType::RessourceType_GenericTracker;
+
                 if (Config::GetInstance()->GetOptoutTrackingRole()) {
                     VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
                 }
@@ -535,21 +543,28 @@ namespace VMTDriver {
 
 		switch (m_emulatedDeviceType)
 		{
-		case eEmulatedDeviceType::HtcViveControllerL:
-		case eEmulatedDeviceType::HtcViveControllerR:
+		case eEmulatedDeviceType::DeviceType_HtcViveControllerL:
+		case eEmulatedDeviceType::DeviceType_HtcViveControllerR:
 		{
-			if (m_emulatedDeviceType == eEmulatedDeviceType::HtcViveControllerL)
-			{
-				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_LeftHand);
-				VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, "htc/vive_controllerLHR-F94B3BD8");
-				VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, "LHR-F94B3BD8");
-			}
-			else
-			{
-				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_RightHand);
-				VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, "htc/vive_controllerLHR-F94B3BD9");
-				VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, "LHR-F94B3BD9");
-			}
+			//if (m_emulatedDeviceType == eEmulatedDeviceType::HtcViveControllerL)
+			//{
+			//	VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_LeftHand);
+			//	VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, "htc/vive_controllerLHR-F94B3BD8");
+			//	VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, "LHR-F94B3BD8");
+			//}
+			//else
+			//{
+			//	VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_RightHand);
+			//	VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, "htc/vive_controllerLHR-F94B3BD9");
+			//	VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, "LHR-F94B3BD9");
+			//}
+
+			std::string registeredDeviceType = Config::GetInstance()->GetDriverName();
+			registeredDeviceType += "/";
+			registeredDeviceType += m_serial.c_str();
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, registeredDeviceType.c_str());
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, m_serial.c_str());
+
 
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "VirtualMotionTracker");
 
@@ -602,7 +617,7 @@ namespace VMTDriver {
 			VRDriverInput()->CreateHapticComponent(m_propertyContainer, "/output/haptic", &HapticComponent);
 			break;
 		}
-		case eEmulatedDeviceType::HtcViveTracker:
+		case eEmulatedDeviceType::DeviceType_HtcViveTracker:
 		{
 			VRProperties()->SetUint64Property(m_propertyContainer, Prop_CurrentUniverseId_Uint64, 2);
 			VRProperties()->SetUint64Property(m_propertyContainer, Prop_PreviousUniverseId_Uint64, 2);
@@ -646,9 +661,10 @@ namespace VMTDriver {
 			//VRProperties()->SetUint64Property(m_propertyContainer, Prop_ParentDriver_Uint64, 8589934597);
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ResourceRoot_String, "htc");
 
-			std::string RegisteredDeviceType_String = std::string("vmt/");
-			RegisteredDeviceType_String += m_serial.c_str();
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, RegisteredDeviceType_String.c_str());
+			std::string registeredDeviceType = Config::GetInstance()->GetDriverName();
+			registeredDeviceType += "/";
+			registeredDeviceType += m_serial.c_str();
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, registeredDeviceType.c_str());
 
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Identifiable_Bool, false);
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_RemindUpdate_Bool, false);
@@ -676,15 +692,25 @@ namespace VMTDriver {
 			VRDriverInput()->CreateHapticComponent(m_propertyContainer, "/output/haptic", &HapticComponent);
 			break;
 		}
-
-		//Default VMT device
 		default:
 		{
+			std::string driverName = Config::GetInstance()->GetDriverName();
+			 
+			std::string ressourcePath = "";
+			ressourcePath += "{";
+			ressourcePath += driverName.c_str();
+			ressourcePath += "}";
+
+			std::string renderModelName = "";
+			renderModelName += ressourcePath.c_str();
+			renderModelName += Config::GetInstance()->GetRessourceRenderModelPrefix(m_ressourceType);
+			renderModelName += "_rendermodel";
+
 			//OpenVR デバイスプロパティの設定
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "VirtualMotionTracker");
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ModelNumber_String, m_serial.c_str());
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, m_serial.c_str());
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RenderModelName_String, "{vmt}vmt_rendermodel");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RenderModelName_String, renderModelName.c_str());
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_WillDriftInYaw_Bool, false);
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ManufacturerName_String, "VirtualMotionTracker");
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingFirmwareVersion_String, Version.c_str());
@@ -716,11 +742,20 @@ namespace VMTDriver {
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_ForceUpdateRequired_Bool, false);
 
 			VRProperties()->SetUint64Property(m_propertyContainer, Prop_ParentDriver_Uint64, 0);
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ResourceRoot_String, "vmt");
-			std::string RegisteredDeviceType_String = std::string("vmt/");
-			RegisteredDeviceType_String += m_serial.c_str();
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, RegisteredDeviceType_String.c_str());
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_InputProfilePath_String, "{vmt}/input/vmt_profile.json"); //vmt_profile.jsonに影響する
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ResourceRoot_String, driverName.c_str());
+
+			std::string registeredDeviceType = "";
+			registeredDeviceType += driverName.c_str();
+			registeredDeviceType += "/";
+			registeredDeviceType += m_serial.c_str(); 
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, registeredDeviceType.c_str());
+
+
+			std::string inputProfilePath = "";
+			inputProfilePath += ressourcePath.c_str();
+			inputProfilePath += "/input/vmt_profile.json";
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_InputProfilePath_String, inputProfilePath.c_str()); //vmt_profile.jsonに影響する
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_NeverTracked_Bool, false);
 
 
@@ -739,16 +774,64 @@ namespace VMTDriver {
 			VRProperties()->SetFloatProperty(m_propertyContainer, Prop_DisplayMinAnalogGain_Float, 1.0f);
 			VRProperties()->SetFloatProperty(m_propertyContainer, Prop_DisplayMaxAnalogGain_Float, 1.0f);
 
+			std::string iconRessourcePath = "";
+			iconRessourcePath += ressourcePath.c_str();
+			iconRessourcePath += "/icons/";
+			iconRessourcePath += Config::GetInstance()->GetRessourceIconPrefix(m_ressourceType);
+			
+			std::string iconRessourceName = "";
+			iconRessourceName += iconRessourcePath.c_str();
+			iconRessourceName += "_Off32x32.png";
 
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceOff_String, "{vmt}/icons/Off32x32.png");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearching_String, "{vmt}/icons/Searching32x32.png");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearchingAlert_String, "{vmt}/icons/SearchingAlert32x32.png");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReady_String, "{vmt}/icons/Ready32x32.png");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReadyAlert_String, "{vmt}/icons/ReadyAlert32x32.png");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceNotReady_String, "{vmt}/icons/NotReady32x32.png");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceStandby_String, "{vmt}/icons/Standby32x32.png");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceStandbyAlert_String, "{vmt}/icons/StandbyAlert32x32.png");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceAlertLow_String, "{vmt}/icons/AlertLow32x32.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceOff_String, iconRessourceName.c_str());
+
+			iconRessourceName = "";
+			iconRessourceName += iconRessourcePath.c_str();
+			iconRessourceName += "_Searching32x32.png";
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearching_String, iconRessourceName.c_str());
+
+			iconRessourceName = "";
+			iconRessourceName += iconRessourcePath.c_str();
+			iconRessourceName += "_SearchingAlert32x32.png";
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearchingAlert_String, iconRessourceName.c_str());
+
+			iconRessourceName = "";
+			iconRessourceName += iconRessourcePath.c_str();
+			iconRessourceName += "_Ready32x32.png";
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReady_String, iconRessourceName.c_str());
+
+			iconRessourceName = "";
+			iconRessourceName += iconRessourcePath.c_str();
+			iconRessourceName += "_ReadyAlert32x32.png";
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReadyAlert_String, iconRessourceName.c_str());
+
+			iconRessourceName = "";
+			iconRessourceName += iconRessourcePath.c_str();
+			iconRessourceName += "_NotReady32x32.png";
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceNotReady_String, iconRessourceName.c_str());
+
+			iconRessourceName = "";
+			iconRessourceName += iconRessourcePath.c_str();
+			iconRessourceName += "_Standby32x32.png";
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceStandby_String, iconRessourceName.c_str());
+
+			iconRessourceName = "";
+			iconRessourceName += iconRessourcePath.c_str();
+			iconRessourceName += "_StandbyAlert32x32.png";
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceStandbyAlert_String, iconRessourceName.c_str());
+			
+			iconRessourceName = "";
+			iconRessourceName += iconRessourcePath.c_str();
+			iconRessourceName += "_AlertLow32x32.png";
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceAlertLow_String, iconRessourceName.c_str());
 
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasDisplayComponent_Bool, false);
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasCameraComponent_Bool, false);

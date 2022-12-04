@@ -51,6 +51,23 @@ namespace VMTDriver {
 	class VRWatchdogProvider;
 	class Log;
 
+	enum class eRessourceType
+	{
+		RessourceType_Default,
+		RessourceType_GenericTracker,
+		RessourceType_LeftController,
+		RessourceType_RightController,
+		RessourceType_TrackingReference
+	};
+
+	enum class eEmulatedDeviceType
+	{
+		DeviceType_Vmt,
+		DeviceType_HtcViveTracker,
+		DeviceType_HtcViveControllerL,
+		DeviceType_HtcViveControllerR
+	};
+
 	enum class ReferMode_t {
 		None = 0,   // ルーム座標を使用する
 		Joint = 1,  // Position, Rotation共に他のトラッカーデバイスの座標系を参照する
