@@ -50,6 +50,14 @@ namespace VMTDriver {
     class TrackedDeviceServerDriver : public ITrackedDeviceServerDriver
     {
     private:
+
+		enum eEmulatedDeviceType
+		{
+			Vmt,
+			HtcViveTracker,
+			HtcViveCOntroller
+		};
+		eEmulatedDeviceType m_emulatedDeviceType = eEmulatedDeviceType::Vmt;
         bool m_alreadyRegistered = false;
         string m_serial = "";
         TrackedDeviceIndex_t m_deviceIndex{ 0 };
