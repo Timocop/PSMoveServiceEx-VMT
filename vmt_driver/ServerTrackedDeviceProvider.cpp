@@ -87,7 +87,8 @@ namespace VMTDriver {
         for (int i = 0; i < m_devices.size(); i++)
         {
             //シリアル番号を準備
-            string name = "VMT_";
+            string name = Config::GetInstance()->GetSerialPrefix();
+			name.append("_");
             name.append(std::to_string(i));
             m_devices[i].SetDeviceSerial(name);
 

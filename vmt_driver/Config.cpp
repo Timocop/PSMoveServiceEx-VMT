@@ -136,6 +136,10 @@ namespace VMTDriver {
 		{
 			j["DriverName"] = "vmt";
 		}
+		if (!j.contains("SerialPrefix"))
+		{
+			j["SerialPrefix"] = "VMT";
+		}
 		if (!j.contains("DefaultRenderModelPrefix"))
 		{
 			j["DefaultRenderModelPrefix"] = "vmt";
@@ -230,6 +234,10 @@ namespace VMTDriver {
 			if (j.contains("DriverName"))
 			{
 				m_DriverName = j["DriverName"];
+			}
+			if (j.contains("SerialPrefix"))
+			{
+				m_SerialPrefix = j["SerialPrefix"];
 			}
 			if (j.contains("DefaultRenderModelPrefix"))
 			{
@@ -365,6 +373,11 @@ namespace VMTDriver {
 	std::string Config::GetDriverName()
 	{
 		return m_DriverName;
+	}
+
+	std::string Config::GetSerialPrefix()
+	{
+		return m_SerialPrefix;
 	}
 
 	std::string Config::GetRessourceRenderModelPrefix(eRessourceType type)

@@ -43,6 +43,7 @@ namespace VMTDriver {
 		bool m_RejectWhenCannotTracking = true;
 		bool m_DefaultAutoPoseUpdateOn = true;
 		std::string m_DriverName = "vmt";
+		std::string m_SerialPrefix = "VMT";
 		std::string m_DefaultRenderModelPrefix = "vmt";
 		std::string m_GenericTrackerRenderModelPrefix = "vmt";
 		std::string m_LeftControllerRenderModelPrefix = "vmt";
@@ -78,6 +79,7 @@ namespace VMTDriver {
 		bool GetRejectWhenCannotTracking();
 		bool GetDefaultAutoPoseUpdateOn();
 		std::string GetDriverName();
+		std::string GetSerialPrefix();
 		std::string GetRessourceRenderModelPrefix(eRessourceType type);
 		std::string GetRessourceIconPrefix(eRessourceType type);
 	};
