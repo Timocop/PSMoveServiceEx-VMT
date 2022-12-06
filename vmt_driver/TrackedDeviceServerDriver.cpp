@@ -792,7 +792,9 @@ namespace VMTDriver {
 
 			std::string inputProfilePath = "";
 			inputProfilePath += ressourcePath.c_str();
-			inputProfilePath += "/input/vmt_profile.json";
+			inputProfilePath += "/input/";
+			inputProfilePath += driverName.c_str();
+			inputProfilePath += "_profile.json";
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_InputProfilePath_String, inputProfilePath.c_str()); //vmt_profile.jsonに影響する
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_NeverTracked_Bool, false);
 
