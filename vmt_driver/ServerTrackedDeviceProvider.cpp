@@ -85,9 +85,10 @@ namespace VMTDriver {
 			//デバイスがつながっているので、シリアルナンバーを取得する
 			PropertyContainerHandle_t h = props->TrackedDeviceToPropertyContainer(i);
 			string SerialNumber = helper->GetStringProperty(h, ETrackedDeviceProperty::Prop_SerialNumber_String);
+			int deviceClass = helper->GetInt32Property(h, ETrackedDeviceProperty::Prop_DeviceClass_Int32);
 
 			//取得できた情報を文字列に格納する
-			result = result + std::to_string(i) + ":" + SerialNumber + "\n";
+			result = result + std::to_string(i) + ":" + std::to_string(deviceClass) + ":" + SerialNumber + "\n";
 		}
 		return result;
 	}
