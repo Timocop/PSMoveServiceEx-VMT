@@ -371,7 +371,7 @@ namespace VMTDriver {
     //仮想デバイスからOpenVRへデバイスの登録を依頼する
     void TrackedDeviceServerDriver::RegisterToVRSystem(int type)
     {
-        if (!m_alreadyRegistered)
+        if (!m_alreadyRegistered && !m_registrationInProgress)
         {
             // $TODO: Add oculus/index emulation
 			switch (type)
@@ -383,21 +383,21 @@ namespace VMTDriver {
 					VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
 				}
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_TrackingReference, this);
-				m_alreadyRegistered = true;
+				m_registrationInProgress = true;
 				break;
 			case 7://Controller Right (HTC Vive Wand Emulation)
 				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcViveControllerR;
 
 				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_RightHand);
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
-				m_alreadyRegistered = true;
+				m_registrationInProgress = true;
 				break;
 			case 6://Controller Left (HTC Vive Wand Emulation)
 				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcViveControllerL;
 
 				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_LeftHand);
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
-				m_alreadyRegistered = true;
+				m_registrationInProgress = true;
 				break;
 			case 5://Tracker (HTC Vive Tracker Emulation)
 				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcViveTracker;
@@ -406,7 +406,7 @@ namespace VMTDriver {
 					VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
 				}
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_GenericTracker, this);
-				m_alreadyRegistered = true;
+				m_registrationInProgress = true;
 				break;
 			case 4://TrackingReference
 				m_ressourceType = eRessourceType::RessourceType_TrackingReference;
@@ -415,21 +415,21 @@ namespace VMTDriver {
 					VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
 				}
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_TrackingReference, this);
-				m_alreadyRegistered = true;
+				m_registrationInProgress = true;
 				break;
             case 3://Controller Right
 				m_ressourceType = eRessourceType::RessourceType_RightController;
 
                 VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_RightHand);
                 VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
-                m_alreadyRegistered = true;
+				m_registrationInProgress = true;
                 break;
             case 2://Controller Left
 				m_ressourceType = eRessourceType::RessourceType_LeftController;
 
                 VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_LeftHand);
                 VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
-                m_alreadyRegistered = true;
+				m_registrationInProgress = true;
                 break;
             case 1://Tracker
 				m_ressourceType = eRessourceType::RessourceType_GenericTracker;
@@ -438,7 +438,7 @@ namespace VMTDriver {
                     VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
                 }
                 VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_GenericTracker, this);
-                m_alreadyRegistered = true;
+				m_registrationInProgress = true;
                 break;
             default:
                 break;
@@ -960,6 +960,8 @@ namespace VMTDriver {
 		}
 		}
 
+		m_alreadyRegistered = true;
+		m_registrationInProgress = false;
         return EVRInitError::VRInitError_None;
     }
 
