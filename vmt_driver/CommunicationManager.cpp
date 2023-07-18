@@ -136,6 +136,18 @@ namespace VMTDriver {
 		DirectOSC::OSC::GetInstance()->GetSocketTx()->Send(packet.Data(), packet.Size());
 	}
 
+	void OSCReceiver::SendDevices(std::string msg)
+	{
+		const size_t bufsize = 8192;
+		char buf[bufsize]{};
+		osc::OutboundPacketStream packet(buf, bufsize);
+
+		packet << osc::BeginMessage("/VMT/Out/DevicesList")
+			<< msg.c_str()
+			<< osc::EndMessage;
+		DirectOSC::OSC::GetInstance()->GetSocketTx()->Send(packet.Data(), packet.Size());
+	}
+
 	//受信処理
 	void OSCReceiver::ProcessMessage(const osc::ReceivedMessage& m, const IpEndpointName& remoteEndpoint)
 	{
@@ -267,6 +279,12 @@ namespace VMTDriver {
 			{
 				args >> enable >> osc::EndMessage;
 				TrackedDeviceServerDriver::SetAutoUpdate(enable != 0);
+			}
+			//デバイス一覧の取得
+			else if (adr == "/VMT/GetDevicesList")
+			{
+				std::string result = GetServer()->GetOpenVRDevicesString();
+				OSCReceiver::SendDevices(result);
 			}
 			//デバイスの姿勢を取得して返信
 			else if (adr == "/VMT/GetDevicePose")

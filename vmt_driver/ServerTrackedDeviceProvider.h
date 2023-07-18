@@ -42,6 +42,7 @@ namespace VMTDriver {
         bool IsVMTDeviceIndex(int index);
         string GetInstallPath();
 		void RequestRestart();
+		std::string GetOpenVRDevicesString();
 
         //OpenVR向け
         virtual EVRInitError Init(IVRDriverContext* pDriverContext) override;

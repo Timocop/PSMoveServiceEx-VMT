@@ -63,6 +63,35 @@ namespace VMTDriver {
 		VRServerDriverHost()->RequestRestart("*** RESTART REQUIRED ***", "", "", "");
 	}
 
+	//全デバイス情報文字列の取得
+	std::string ServerTrackedDeviceProvider::GetOpenVRDevicesString()
+	{
+		std::string result("");
+
+		IVRProperties* props = VRPropertiesRaw();
+		CVRPropertyHelpers* helper = VRProperties();
+		vr::TrackedDevicePose_t poses[k_unMaxTrackedDeviceCount]{};
+
+		//OpenVRから全トラッキングデバイスの情報を取得する
+		VRServerDriverHost()->GetRawTrackedDevicePoses(0.0f, poses, k_unMaxTrackedDeviceCount);
+
+		//デバイスをOpenVR index順に調べる
+		for (uint32_t i = 0; i < k_unMaxTrackedDeviceCount; i++) {
+			//そのデバイスがつながっていないなら次のデバイスへ
+			if (poses[i].bDeviceIsConnected != true) {
+				continue;
+			}
+
+			//デバイスがつながっているので、シリアルナンバーを取得する
+			PropertyContainerHandle_t h = props->TrackedDeviceToPropertyContainer(i);
+			string SerialNumber = helper->GetStringProperty(h, ETrackedDeviceProperty::Prop_SerialNumber_String);
+
+			//取得できた情報を文字列に格納する
+			result = result + std::to_string(i) + ":" + SerialNumber + "\n";
+		}
+		return result;
+	}
+
 
 
     //** OpenVR向け関数群 **
