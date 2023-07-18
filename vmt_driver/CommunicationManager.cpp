@@ -278,6 +278,12 @@ namespace VMTDriver {
 					OSCReceiver::SendDevicePose(pose, serialNumber);
 				}
 			}
+			//すべてのデバイスのリセット
+			else if (adr == "/VMT/RequestRestart")
+			{
+				GetServer()->RequestRestart();
+			}
+
 			//不明なパケット
 			else {
 				Log::printf("Unkown: %s", adr.c_str());

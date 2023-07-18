@@ -58,6 +58,11 @@ namespace VMTDriver {
         return m_installPath;
     }
 
+	//再起動要求
+	void ServerTrackedDeviceProvider::RequestRestart() {
+		VRServerDriverHost()->RequestRestart("*** RESTART REQUIRED ***", "", "", "");
+	}
+
 
 
     //** OpenVR向け関数群 **
