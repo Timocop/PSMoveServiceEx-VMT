@@ -113,6 +113,29 @@ namespace VMTDriver {
 		DirectOSC::OSC::GetInstance()->GetSocketTx()->Send(packet.Data(), packet.Size());
 	}
 
+	//デバイス姿勢とシリアル番号を送信する
+	void OSCReceiver::SendDevicePose(const Eigen::Affine3d& pose, const char* serialNumber)
+	{
+		const size_t bufsize = 8192;
+		char buf[bufsize]{};
+		osc::OutboundPacketStream packet(buf, bufsize);
+
+		const Eigen::Translation3d pos(pose.translation());
+		const Eigen::Quaterniond rot(pose.rotation());
+
+		packet << osc::BeginMessage("/VMT/Out/DevicePose")
+			<< serialNumber
+			<< (float)pos.x()
+			<< (float)pos.y()
+			<< (float)pos.z()
+			<< (float)rot.x()
+			<< (float)rot.y()
+			<< (float)rot.z()
+			<< (float)rot.w()
+			<< osc::EndMessage;
+		DirectOSC::OSC::GetInstance()->GetSocketTx()->Send(packet.Data(), packet.Size());
+	}
+
 	//受信処理
 	void OSCReceiver::ProcessMessage(const osc::ReceivedMessage& m, const IpEndpointName& remoteEndpoint)
 	{
@@ -130,6 +153,7 @@ namespace VMTDriver {
 		int ButtonValue{};
 		float TriggerValue{};
 		const char* root_sn = nullptr;
+		const char* serialNumber = nullptr;
 
 		float m1{};
 		float m2{};
@@ -243,6 +267,16 @@ namespace VMTDriver {
 			{
 				args >> enable >> osc::EndMessage;
 				TrackedDeviceServerDriver::SetAutoUpdate(enable != 0);
+			}
+			//デバイスの姿勢を取得して返信
+			else if (adr == "/VMT/GetDevicePose")
+			{
+				args >> serialNumber >> osc::EndMessage;
+				Eigen::Affine3d pose;
+				if (TrackedDeviceServerDriver::GetDevicePose(pose, serialNumber))
+				{
+					OSCReceiver::SendDevicePose(pose, serialNumber);
+				}
 			}
 			//不明なパケット
 			else {

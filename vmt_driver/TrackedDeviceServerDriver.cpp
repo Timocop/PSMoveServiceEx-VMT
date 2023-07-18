@@ -537,7 +537,46 @@ namespace VMTDriver {
         s_autoUpdate = enable;
     }
 
+    /**
+     * 指定されたシリアルナンバーのデバイスの姿勢を取得する
+     * @param out_pose デバイスの姿勢が格納される
+     * @param in_serialNumber 姿勢を取得するデバイスのシリアルナンバー
+     * @return 取得に成功したか
+     */
+    bool TrackedDeviceServerDriver::GetDevicePose(Eigen::Affine3d& out_pose, const char* in_serialNumber)
+    {
+        const std::string serialNumber = in_serialNumber ? in_serialNumber : "";
 
+        //OpenVRから全トラッキングデバイスの情報を取得する
+        vr::TrackedDevicePose_t devicePoses[k_unMaxTrackedDeviceCount]{};
+        VRServerDriverHost()->GetRawTrackedDevicePoses(0.0f, devicePoses, k_unMaxTrackedDeviceCount);
+
+        //接続済みのデバイスの中から、シリアル番号でデバイスを検索する
+        int index = SearchDevice(devicePoses, serialNumber);
+
+        //探索エラーが帰ってきたら失敗
+        if (index == k_unTrackedDeviceIndexInvalid) {
+            return false;
+        }
+
+        vr::TrackedDevicePose_t& devicePose = devicePoses[index];
+
+        //デバイスのトラッキング状態が正常なら
+        if (devicePose.bPoseIsValid) 
+        {
+            //デバイスの変換行列を取得し、Eigenの行列に変換
+            float* m = (float*)(devicePose.mDeviceToAbsoluteTracking.m);
+
+            out_pose.matrix() <<
+                m[0 * 4 + 0], m[0 * 4 + 1], m[0 * 4 + 2], m[0 * 4 + 3],
+                m[1 * 4 + 0], m[1 * 4 + 1], m[1 * 4 + 2], m[1 * 4 + 3],
+                m[2 * 4 + 0], m[2 * 4 + 1], m[2 * 4 + 2], m[2 * 4 + 3],
+                0.0, 0.0, 0.0, 1.0;
+
+            return true;
+        }
+        return false;
+    }
 
 
     //** OpenVR向け関数群 **

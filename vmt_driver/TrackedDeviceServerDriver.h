@@ -87,13 +87,14 @@ namespace VMTDriver {
 		void UpdateJoystickInput(uint32_t index, float x, float y, double timeoffset);
 		void Reset();
 
-		void CalcVelocity(DriverPose_t& pose);
-		void CalcJoint(DriverPose_t& pose, string serial, ReferMode_t mode, Eigen::Affine3d& RoomToDriverAffin);
-		int SearchDevice(vr::TrackedDevicePose_t* poses, string serial);
-		void RejectTracking(DriverPose_t& pose);
-		void ProcessEvent(VREvent_t &VREvent);
+        void CalcVelocity(DriverPose_t& pose);
+        void CalcJoint(DriverPose_t& pose, string serial, ReferMode_t mode, Eigen::Affine3d& RoomToDriverAffin);
+        static int SearchDevice(vr::TrackedDevicePose_t* poses, string serial);
+        void RejectTracking(DriverPose_t& pose);
+        void ProcessEvent(VREvent_t &VREvent);
 
-		static void SetAutoUpdate(bool enable);
+        static void SetAutoUpdate(bool enable);
+        static bool GetDevicePose(Eigen::Affine3d& out_pose, const char* in_serialNumber);
 
 		//OpenVR向け
 		virtual EVRInitError Activate(uint32_t unObjectId) override;
