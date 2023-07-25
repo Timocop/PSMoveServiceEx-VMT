@@ -86,6 +86,7 @@ namespace VMTDriver {
 		void UpdateButtonInput(uint32_t index, bool value, double timeoffset);
 		void UpdateTriggerInput(uint32_t index, float value, double timeoffset);
 		void UpdateJoystickInput(uint32_t index, float x, float y, double timeoffset);
+		void UpdateBatteryProperty(float value);
 		void Reset();
 
         void CalcVelocity(DriverPose_t& pose);

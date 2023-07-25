@@ -166,6 +166,7 @@ namespace VMTDriver {
 		float TriggerValue{};
 		const char* root_sn = nullptr;
 		const char* serialNumber = nullptr;
+		float batteryValue;
 
 		float m1{};
 		float m2{};
@@ -248,6 +249,14 @@ namespace VMTDriver {
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
 					GetServer()->GetDevice(idx).UpdateJoystickInput(ButtonIndex, x, y, timeoffset);
+				}
+			}
+			else if (adr == "/VMT/Property/Battery")
+			{
+				args >> idx >> batteryValue >> osc::EndMessage;
+				if (GetServer()->IsVMTDeviceIndex(idx))
+				{
+					GetServer()->GetDevice(idx).UpdateBatteryProperty(batteryValue);
 				}
 			}
 			//すべてのデバイスのリセット

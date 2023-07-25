@@ -477,16 +477,32 @@ namespace VMTDriver {
         }
     }
 
-    //仮想デバイスからOpenVRへデバイスのジョイスティック(2軸)状態の更新を通知する
-    void TrackedDeviceServerDriver::UpdateJoystickInput(uint32_t index, float x, float y, double timeoffset)
-    {
-        if (!m_alreadyRegistered) { return; }
-        if (index == 0)
-        {
-            VRDriverInput()->UpdateScalarComponent(JoystickComponent[index + 0], x, timeoffset);
-            VRDriverInput()->UpdateScalarComponent(JoystickComponent[index + 1], y, timeoffset);
-        }
-    }
+	//仮想デバイスからOpenVRへデバイスのジョイスティック(2軸)状態の更新を通知する
+	void TrackedDeviceServerDriver::UpdateJoystickInput(uint32_t index, float x, float y, double timeoffset)
+	{
+		if (!m_alreadyRegistered) { return; }
+		if (index == 0)
+		{
+			VRDriverInput()->UpdateScalarComponent(JoystickComponent[index + 0], x, timeoffset);
+			VRDriverInput()->UpdateScalarComponent(JoystickComponent[index + 1], y, timeoffset);
+		}
+	}
+
+	void TrackedDeviceServerDriver::UpdateBatteryProperty(float value)
+	{
+		if (!m_alreadyRegistered) { return; } 
+		if (value > 1.0) {
+			value = 1.0;
+		}
+		if (value < 0) {
+			value = 0;
+		}
+		if (isnan(value)) {
+			value = 0;
+		}
+
+		VRProperties()->SetFloatProperty(m_propertyContainer, Prop_DeviceBatteryPercentage_Float, value);
+	}
 
     //仮想デバイスの状態をリセットする
     void TrackedDeviceServerDriver::Reset()
