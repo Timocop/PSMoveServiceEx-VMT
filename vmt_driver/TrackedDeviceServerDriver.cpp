@@ -21,7 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 #include "TrackedDeviceServerDriver.h"
+
+#define TRACKING_UNIVERSE_ID 6
+
 namespace VMTDriver {
     //** 内部向け関数群 **
 
@@ -623,7 +627,10 @@ namespace VMTDriver {
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ModelNumber_String, m_serial.c_str());
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, m_serial.c_str());
 
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "htc");
+			std::string trackingSystemName = Config::GetInstance()->GetDriverName();
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, trackingSystemName.c_str());
+			VRProperties()->SetUint64Property(m_propertyContainer, Prop_CurrentUniverseId_Uint64, TRACKING_UNIVERSE_ID);
+			VRProperties()->SetUint64Property(m_propertyContainer, Prop_PreviousUniverseId_Uint64, TRACKING_UNIVERSE_ID);
 
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RenderModelName_String, "lh_basestation_vive");
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ManufacturerName_String, "HTC");
@@ -663,8 +670,10 @@ namespace VMTDriver {
 			//VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, registeredDeviceType.c_str());
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, m_serial.c_str());
 
-
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "htc");
+			std::string trackingSystemName = Config::GetInstance()->GetDriverName();
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, trackingSystemName.c_str());
+			VRProperties()->SetUint64Property(m_propertyContainer, Prop_CurrentUniverseId_Uint64, TRACKING_UNIVERSE_ID);
+			VRProperties()->SetUint64Property(m_propertyContainer, Prop_PreviousUniverseId_Uint64, TRACKING_UNIVERSE_ID);
 
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_WillDriftInYaw_Bool, false);
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DeviceIsWireless_Bool, true);
@@ -722,10 +731,11 @@ namespace VMTDriver {
 				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
 			}
 
-			VRProperties()->SetUint64Property(m_propertyContainer, Prop_CurrentUniverseId_Uint64, 2);
-			VRProperties()->SetUint64Property(m_propertyContainer, Prop_PreviousUniverseId_Uint64, 2);
+			std::string trackingSystemName = Config::GetInstance()->GetDriverName();
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, trackingSystemName.c_str());
+			VRProperties()->SetUint64Property(m_propertyContainer, Prop_CurrentUniverseId_Uint64, TRACKING_UNIVERSE_ID);
+			VRProperties()->SetUint64Property(m_propertyContainer, Prop_PreviousUniverseId_Uint64, TRACKING_UNIVERSE_ID);
 
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "htc");
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ModelNumber_String, m_serial.c_str());
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, m_serial.c_str());
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RenderModelName_String, "{htc}vr_tracker_vive_1_0");
@@ -837,8 +847,11 @@ namespace VMTDriver {
 			renderModelName += Config::GetInstance()->GetRessourceRenderModelPrefix(m_trackerType);
 			renderModelName += "_rendermodel";
 
-			//OpenVR デバイスプロパティの設定
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "VirtualMotionTracker");
+			std::string trackingSystemName = Config::GetInstance()->GetDriverName();
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, trackingSystemName.c_str());
+			VRProperties()->SetUint64Property(m_propertyContainer, Prop_CurrentUniverseId_Uint64, TRACKING_UNIVERSE_ID);
+			VRProperties()->SetUint64Property(m_propertyContainer, Prop_PreviousUniverseId_Uint64, TRACKING_UNIVERSE_ID);
+
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ModelNumber_String, m_serial.c_str());
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, m_serial.c_str());
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RenderModelName_String, renderModelName.c_str());
@@ -898,9 +911,6 @@ namespace VMTDriver {
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_RemindUpdate_Bool, false);
 
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_ReportsTimeSinceVSync_Bool, false);
-
-			VRProperties()->SetUint64Property(m_propertyContainer, Prop_CurrentUniverseId_Uint64, 2);
-			VRProperties()->SetUint64Property(m_propertyContainer, Prop_PreviousUniverseId_Uint64, 2);
 
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DisplaySupportsRuntimeFramerateChange_Bool, false);
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DisplaySupportsAnalogGain_Bool, false);
