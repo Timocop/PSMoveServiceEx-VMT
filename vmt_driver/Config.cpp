@@ -393,23 +393,23 @@ namespace VMTDriver {
 		return m_SerialPrefix;
 	}
 
-	std::string Config::GetRessourceRenderModelPrefix(eRessourceType type)
+	std::string Config::GetRessourceRenderModelPrefix(eTrackerType type)
 	{
 		switch (type)
 		{
-		case eRessourceType::RessourceType_GenericTracker:
+		case eTrackerType::TrackerType_GenericTracker:
 		{
 			return m_GenericTrackerRenderModelPrefix;
 		}
-		case eRessourceType::RessourceType_LeftController:
+		case eTrackerType::TrackerType_LeftController:
 		{
 			return m_LeftControllerRenderModelPrefix;
 		}
-		case eRessourceType::RessourceType_RightController:
+		case eTrackerType::TrackerType_RightController:
 		{
 			return m_RightControllerRenderModelPrefix;
 		}
-		case eRessourceType::RessourceType_TrackingReference:
+		case eTrackerType::TrackerType_TrackingReference:
 		{
 			return m_TrackingReferenceRenderModelPrefix;
 		}
@@ -420,23 +420,23 @@ namespace VMTDriver {
 		}
 	}
 
-	std::string Config::GetRessourceIconPrefix(eRessourceType type)
+	std::string Config::GetRessourceIconPrefix(eTrackerType type)
 	{
 		switch (type)
 		{
-		case eRessourceType::RessourceType_GenericTracker:
+		case eTrackerType::TrackerType_GenericTracker:
 		{
 			return m_GenericTrackerIconPrefix;
 		}
-		case eRessourceType::RessourceType_LeftController:
+		case eTrackerType::TrackerType_LeftController:
 		{
 			return m_LeftControllerIconPrefix;
 		}
-		case eRessourceType::RessourceType_RightController:
+		case eTrackerType::TrackerType_RightController:
 		{
 			return m_RightControllerIconPrefix;
 		}
-		case eRessourceType::RessourceType_TrackingReference:
+		case eTrackerType::TrackerType_TrackingReference:
 		{
 			return m_TrackingReferenceIconPrefix;
 		}

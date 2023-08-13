@@ -82,7 +82,7 @@ namespace VMTDriver {
 		bool GetDefaultAutoPoseUpdateOn();
 		std::string GetDriverName();
 		std::string GetSerialPrefix();
-		std::string GetRessourceRenderModelPrefix(eRessourceType type);
-		std::string GetRessourceIconPrefix(eRessourceType type);
+		std::string GetRessourceRenderModelPrefix(eTrackerType type);
+		std::string GetRessourceIconPrefix(eTrackerType type);
 	};
 }

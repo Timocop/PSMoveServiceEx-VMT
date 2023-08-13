@@ -51,22 +51,17 @@ namespace VMTDriver {
 	class VRWatchdogProvider;
 	class Log;
 
-	enum class eRessourceType
+	enum class eTrackerType
 	{
-		RessourceType_Default,
-		RessourceType_GenericTracker,
-		RessourceType_LeftController,
-		RessourceType_RightController,
-		RessourceType_TrackingReference
-	};
-
-	enum class eEmulatedDeviceType
-	{
-		DeviceType_Vmt,
-		DeviceType_HtcViveTracker,
-		DeviceType_HtcViveControllerL,
-		DeviceType_HtcViveControllerR,
-		DeviceType_HtcLighthouse
+		TrackerType_Invalid,
+		TrackerType_GenericTracker,
+		TrackerType_LeftController,
+		TrackerType_RightController,
+		TrackerType_TrackingReference,
+		TrackerType_HtcTracker,
+		TrackerType_HtcLeftController,
+		TrackerType_HtcRightController,
+		TrackerType_HtcBasestation,
 	};
 
 	enum class ReferMode_t {

@@ -50,8 +50,7 @@ namespace VMTDriver {
     class TrackedDeviceServerDriver : public ITrackedDeviceServerDriver
     {
 	private:
-		eRessourceType m_ressourceType = eRessourceType::RessourceType_Default;
-		eEmulatedDeviceType m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_Vmt;
+		eTrackerType m_trackerType = eTrackerType::TrackerType_Invalid;
 		bool m_alreadyRegistered = false;
 		bool m_registrationInProgress = false;
 		string m_serial = "";
@@ -81,7 +80,7 @@ namespace VMTDriver {
 		void SetPose(DriverPose_t pose);
 		void SetRawPose(RawPose rawPose);
 		DriverPose_t RawPoseToPose();
-		void RegisterToVRSystem(int type);
+		void RegisterToVRSystem(eTrackerType type);
 		void UpdatePoseToVRSystem();
 		void UpdateButtonInput(uint32_t index, bool value, double timeoffset);
 		void UpdateTriggerInput(uint32_t index, float value, double timeoffset);

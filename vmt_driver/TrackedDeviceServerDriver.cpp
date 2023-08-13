@@ -369,77 +369,61 @@ namespace VMTDriver {
     }
 
     //仮想デバイスからOpenVRへデバイスの登録を依頼する
-    void TrackedDeviceServerDriver::RegisterToVRSystem(int type)
+    void TrackedDeviceServerDriver::RegisterToVRSystem(eTrackerType type)
     {
         if (!m_alreadyRegistered && !m_registrationInProgress)
         {
             // $TODO: Add oculus/index emulation
 			switch (type)
             {
-			case 8://TrackingReference (HTC Basestation Emulation)
-				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcLighthouse;
-
-				if (Config::GetInstance()->GetOptoutTrackingRole()) {
-					VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
-				}
+			case eTrackerType::TrackerType_HtcBasestation:
+				m_trackerType = type;
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_TrackingReference, this);
 				m_registrationInProgress = true;
 				break;
-			case 7://Controller Right (HTC Vive Wand Emulation)
-				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcViveControllerR;
 
-				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_RightHand);
+			case eTrackerType::TrackerType_HtcRightController:
+				m_trackerType = type;
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
 				m_registrationInProgress = true;
 				break;
-			case 6://Controller Left (HTC Vive Wand Emulation)
-				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcViveControllerL;
 
-				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_LeftHand);
+			case eTrackerType::TrackerType_HtcLeftController:
+				m_trackerType = type;
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
 				m_registrationInProgress = true;
 				break;
-			case 5://Tracker (HTC Vive Tracker Emulation)
-				m_emulatedDeviceType = eEmulatedDeviceType::DeviceType_HtcViveTracker;
 
-				if (Config::GetInstance()->GetOptoutTrackingRole()) {
-					VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
-				}
+			case eTrackerType::TrackerType_HtcTracker:
+				m_trackerType = type;
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_GenericTracker, this);
 				m_registrationInProgress = true;
 				break;
-			case 4://TrackingReference
-				m_ressourceType = eRessourceType::RessourceType_TrackingReference;
 
-				if (Config::GetInstance()->GetOptoutTrackingRole()) {
-					VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
-				}
+			case eTrackerType::TrackerType_TrackingReference:
+				m_trackerType = type;
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_TrackingReference, this);
 				m_registrationInProgress = true;
 				break;
-            case 3://Controller Right
-				m_ressourceType = eRessourceType::RessourceType_RightController;
 
-                VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_RightHand);
+			case eTrackerType::TrackerType_RightController:
+				m_trackerType = type;
                 VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
 				m_registrationInProgress = true;
                 break;
-            case 2://Controller Left
-				m_ressourceType = eRessourceType::RessourceType_LeftController;
 
-                VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_LeftHand);
+			case eTrackerType::TrackerType_LeftController:
+				m_trackerType = type;
                 VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
 				m_registrationInProgress = true;
                 break;
-            case 1://Tracker
-				m_ressourceType = eRessourceType::RessourceType_GenericTracker;
 
-                if (Config::GetInstance()->GetOptoutTrackingRole()) {
-                    VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
-                }
+			case eTrackerType::TrackerType_GenericTracker:
+				m_trackerType = type;
                 VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_GenericTracker, this);
 				m_registrationInProgress = true;
                 break;
+
             default:
                 break;
             }
@@ -624,10 +608,14 @@ namespace VMTDriver {
         //OpenVR プロパティコンテナの保持
         m_propertyContainer = VRProperties()->TrackedDeviceToPropertyContainer(unObjectId);
 
-		switch (m_emulatedDeviceType)
+		switch (m_trackerType)
 		{
-		case eEmulatedDeviceType::DeviceType_HtcLighthouse:
+		case eTrackerType::TrackerType_HtcBasestation:
 		{
+			if (Config::GetInstance()->GetOptoutTrackingRole()) {
+				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
+			}
+
 			std::string registeredDeviceType = Config::GetInstance()->GetDriverName();
 			registeredDeviceType += "/";
 			registeredDeviceType += m_serial.c_str();
@@ -635,10 +623,10 @@ namespace VMTDriver {
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ModelNumber_String, m_serial.c_str());
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, m_serial.c_str());
 
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "VirtualMotionTracker");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "htc");
 
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RenderModelName_String, "lh_basestation_vive");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ManufacturerName_String, "VirtualMotionTracker");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ManufacturerName_String, "HTC");
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ResourceRoot_String, "lighthouse");
 			VRProperties()->SetInt32Property(m_propertyContainer, Prop_DeviceClass_Int32, TrackedDeviceClass_TrackingReference);
 
@@ -653,30 +641,30 @@ namespace VMTDriver {
 
 			break;
 		}
-		case eEmulatedDeviceType::DeviceType_HtcViveControllerL:
-		case eEmulatedDeviceType::DeviceType_HtcViveControllerR:
+		case eTrackerType::TrackerType_HtcLeftController:
+		case eTrackerType::TrackerType_HtcRightController:
 		{
-			//if (m_emulatedDeviceType == eEmulatedDeviceType::HtcViveControllerL)
-			//{
-			//	VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_LeftHand);
-			//	VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, "htc/vive_controllerLHR-F94B3BD8");
-			//	VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, "LHR-F94B3BD8");
-			//}
-			//else
-			//{
-			//	VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_RightHand);
-			//	VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, "htc/vive_controllerLHR-F94B3BD9");
-			//	VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, "LHR-F94B3BD9");
-			//}
+			if (m_trackerType == eTrackerType::TrackerType_HtcLeftController)
+			{
+				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_LeftHand);
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, "htc/vive_controllerLHR-F94B3BD8");
+				//VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, "LHR-F94B3BD8");
+			}
+			else
+			{
+				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_RightHand);
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, "htc/vive_controllerLHR-F94B3BD9");
+				//VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, "LHR-F94B3BD9");
+			}
 
-			std::string registeredDeviceType = Config::GetInstance()->GetDriverName();
-			registeredDeviceType += "/";
-			registeredDeviceType += m_serial.c_str();
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, registeredDeviceType.c_str());
+			//std::string registeredDeviceType = Config::GetInstance()->GetDriverName();
+			//registeredDeviceType += "/";
+			//registeredDeviceType += m_serial.c_str();
+			//VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, registeredDeviceType.c_str());
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, m_serial.c_str());
 
 
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "VirtualMotionTracker");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "htc");
 
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_WillDriftInYaw_Bool, false);
 			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DeviceIsWireless_Bool, true);
@@ -728,12 +716,16 @@ namespace VMTDriver {
 			VRDriverInput()->CreateHapticComponent(m_propertyContainer, "/output/haptic", &HapticComponent);
 			break;
 		}
-		case eEmulatedDeviceType::DeviceType_HtcViveTracker:
+		case eTrackerType::TrackerType_HtcTracker:
 		{
+			if (Config::GetInstance()->GetOptoutTrackingRole()) {
+				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
+			}
+
 			VRProperties()->SetUint64Property(m_propertyContainer, Prop_CurrentUniverseId_Uint64, 2);
 			VRProperties()->SetUint64Property(m_propertyContainer, Prop_PreviousUniverseId_Uint64, 2);
 
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "VirtualMotionTracker");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, "htc");
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ModelNumber_String, m_serial.c_str());
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, m_serial.c_str());
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RenderModelName_String, "{htc}vr_tracker_vive_1_0");
@@ -805,6 +797,34 @@ namespace VMTDriver {
 		}
 		default:
 		{
+			switch (m_trackerType)
+			{
+			case eTrackerType::TrackerType_TrackingReference:
+			{
+				if (Config::GetInstance()->GetOptoutTrackingRole()) {
+					VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
+				}
+				break;
+			}
+			case eTrackerType::TrackerType_RightController:
+			{
+				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_RightHand);
+				break;
+			}
+			case eTrackerType::TrackerType_LeftController:
+			{
+				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_LeftHand);
+				break;
+			}
+			case eTrackerType::TrackerType_GenericTracker:
+			{
+				if (Config::GetInstance()->GetOptoutTrackingRole()) {
+					VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut); //手に割り当てないように
+				}
+				break;
+			}
+			}
+
 			std::string driverName = Config::GetInstance()->GetDriverName();
 			 
 			std::string ressourcePath = "";
@@ -814,7 +834,7 @@ namespace VMTDriver {
 
 			std::string renderModelName = "";
 			renderModelName += ressourcePath.c_str();
-			renderModelName += Config::GetInstance()->GetRessourceRenderModelPrefix(m_ressourceType);
+			renderModelName += Config::GetInstance()->GetRessourceRenderModelPrefix(m_trackerType);
 			renderModelName += "_rendermodel";
 
 			//OpenVR デバイスプロパティの設定
@@ -890,7 +910,7 @@ namespace VMTDriver {
 			std::string iconRessourcePath = "";
 			iconRessourcePath += ressourcePath.c_str();
 			iconRessourcePath += "/icons/";
-			iconRessourcePath += Config::GetInstance()->GetRessourceIconPrefix(m_ressourceType);
+			iconRessourcePath += Config::GetInstance()->GetRessourceIconPrefix(m_trackerType);
 			
 			std::string iconRessourceName = "";
 			iconRessourceName += iconRessourcePath.c_str();
