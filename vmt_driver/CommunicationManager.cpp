@@ -283,12 +283,6 @@ namespace VMTDriver {
 				Config::GetInstance()->SetRoomMatrix(false, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12);
 				SendLog(0, "Set Room Matrix Done.(Temporary)");
 			}
-			//自動姿勢更新の設定
-			else if (adr == "/VMT/SetAutoPoseUpdate")
-			{
-				args >> enable >> osc::EndMessage;
-				TrackedDeviceServerDriver::SetAutoUpdate(enable != 0);
-			}
 			//デバイス一覧の取得
 			else if (adr == "/VMT/GetDevicesList")
 			{
@@ -346,7 +340,6 @@ namespace VMTDriver {
 		Config* config = Config::GetInstance();
 		//起動時設定読み込み
 		config->LoadSetting();
-		TrackedDeviceServerDriver::SetAutoUpdate(config->GetDefaultAutoPoseUpdateOn());
 
 		//通信ポートオープン
 		DirectOSC::OSC::GetInstance()->Open(&m_rcv, config->GetReceivePort(), config->GetSendIp(), config->GetSendPort());
