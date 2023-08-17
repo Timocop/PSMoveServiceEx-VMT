@@ -30,8 +30,6 @@ namespace VMTDriver {
     //** 内部向け関数群 **
 
     //自動更新を有効にするか
-    bool TrackedDeviceServerDriver::s_autoUpdate = false;
-
     //仮想デバイスのコンストラクタ。(Listから暗黙的にコールされる)
     TrackedDeviceServerDriver::TrackedDeviceServerDriver()
     {
@@ -67,16 +65,10 @@ namespace VMTDriver {
     {
         m_poweron = true; //有効な姿勢なので電源オン状態にする
 
-        if (s_autoUpdate) {
-            //自動更新が有効なら内部姿勢を保存するのみ。(OpenVR姿勢は自動更新されるため)
-            m_rawPose = rawPose;
-        }
-        else {
-            //自動更新が無効ならば内部姿勢を保存し、OpenVR姿勢を更新する
-            m_lastRawPose = m_rawPose; //差分を取るために前回値を取っておく
-            m_rawPose = rawPose;
-            SetPose(RawPoseToPose());
-        }
+		//自動更新が無効ならば内部姿勢を保存し、OpenVR姿勢を更新する
+		m_lastRawPose = m_rawPose; //差分を取るために前回値を取っておく
+		m_rawPose = rawPose;
+		SetPose(RawPoseToPose());
     }
 
     //内部姿勢→OpenVR姿勢の変換と、相対座標計算処理を行う
@@ -359,8 +351,7 @@ namespace VMTDriver {
         }
 
         //速度エミュレーションが有効な場合、速度・各速度の計算を行い、更新する
-		//Velocity updates do not work with pose auto-update enabled.
-        if (!s_autoUpdate && Config::GetInstance()->GetVelocityEnable()) {
+        if (Config::GetInstance()->GetVelocityEnable()) {
             PredictAndCalcVelocity(pose);
         }
 
@@ -573,12 +564,6 @@ namespace VMTDriver {
             //}
             break;
         }
-    }
-
-    //仮想デバイスの姿勢を、OpenVRに転送するたびに自動更新するか
-    void TrackedDeviceServerDriver::SetAutoUpdate(bool enable)
-    {
-        s_autoUpdate = enable;
     }
 
     /**
@@ -1066,14 +1051,6 @@ namespace VMTDriver {
     //OpenVRからのデバイス姿勢取得
     DriverPose_t TrackedDeviceServerDriver::GetPose()
     {
-        //自動更新が有効 AND デバイス登録済み AND 電源オン状態の場合
-        if (s_autoUpdate && m_alreadyRegistered && m_poweron) {
-            //加速度計算の自動更新を行う
-            m_lastRawPose = m_rawPose;
-            m_rawPose.time = std::chrono::system_clock::now();
-            //姿勢情報の更新(他デバイス連動時に効果あり)
-            SetPose(RawPoseToPose());
-        }
         //現在のOpenVR向け姿勢を返却する
         return m_pose;
     }

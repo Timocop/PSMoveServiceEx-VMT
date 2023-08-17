@@ -71,8 +71,6 @@ namespace VMTDriver {
 		VRInputComponentHandle_t HapticComponent{ 0 };
 
 		bool m_poweron = false;
-
-		static bool s_autoUpdate;
 	public:
 		//内部向け
 		TrackedDeviceServerDriver();

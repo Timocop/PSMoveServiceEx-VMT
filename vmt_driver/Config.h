@@ -35,14 +35,13 @@ namespace VMTDriver {
 
 		//Config
 		Eigen::Matrix4d m_RoomToDriverMatrix = Eigen::Matrix4d::Identity();
-		bool m_velocityEnable = false;
+		bool m_velocityEnable = true;
 		int m_receivePort = 39570;
 		std::string m_sendIP = "127.0.0.1";
 		int m_sendPort = 39571;
 		bool m_optoutTrackingRole = true;
 		bool m_HMDisIndex0 = true;
 		bool m_RejectWhenCannotTracking = true;
-		bool m_DefaultAutoPoseUpdateOn = true;
 		std::string m_DriverName = "vmt";
 		std::string m_SerialPrefix = "VMT";
 		std::string m_DefaultRenderModelPrefix = "vmt";

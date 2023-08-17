@@ -106,7 +106,7 @@ namespace VMTDriver {
 		}
 		if (!j.contains("VelocityEnable"))
 		{
-			j["VelocityEnable"] = false;
+			j["VelocityEnable"] = true;
 		}
 		if (!j.contains("ReceivePort"))
 		{
@@ -131,10 +131,6 @@ namespace VMTDriver {
 		if (!j.contains("RejectWhenCannotTracking"))
 		{
 			j["RejectWhenCannotTracking"] = true;
-		}
-		if (!j.contains("DefaultAutoPoseUpdateOn"))
-		{
-			j["DefaultAutoPoseUpdateOn"] = true;
 		}
 		if (!j.contains("DriverName"))
 		{
@@ -234,10 +230,6 @@ namespace VMTDriver {
 			if (j.contains("RejectWhenCannotTracking"))
 			{
 				m_RejectWhenCannotTracking = j["RejectWhenCannotTracking"];
-			}
-			if (j.contains("DefaultAutoPoseUpdateOn"))
-			{
-				m_DefaultAutoPoseUpdateOn = j["DefaultAutoPoseUpdateOn"];
 			}
 			if (j.contains("DriverName"))
 			{
@@ -375,12 +367,6 @@ namespace VMTDriver {
 	bool Config::GetRejectWhenCannotTracking()
 	{
 		return m_RejectWhenCannotTracking;
-	}
-
-	//自動更新をデフォルトでオンにするかを取得する
-	bool Config::GetDefaultAutoPoseUpdateOn()
-	{
-		return m_DefaultAutoPoseUpdateOn;
 	}
 
 	std::string Config::GetDriverName()
