@@ -68,6 +68,7 @@ namespace VMTDriver {
 		//自動更新が無効ならば内部姿勢を保存し、OpenVR姿勢を更新する
 		m_lastRawPose = m_rawPose; //差分を取るために前回値を取っておく
 		m_rawPose = rawPose;
+		m_rawPose.time = std::chrono::system_clock::now();
 		SetPose(RawPoseToPose());
     }
 
