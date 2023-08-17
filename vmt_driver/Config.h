@@ -35,7 +35,6 @@ namespace VMTDriver {
 
 		//Config
 		Eigen::Matrix4d m_RoomToDriverMatrix = Eigen::Matrix4d::Identity();
-		bool m_velocityEnable = true;
 		int m_receivePort = 39570;
 		std::string m_sendIP = "127.0.0.1";
 		int m_sendPort = 39571;
@@ -54,6 +53,7 @@ namespace VMTDriver {
 		std::string m_LeftControllerIconPrefix = "vmt";
 		std::string m_RightControllerIconPrefix = "vmt";
 		std::string m_TrackingReferenceIconPrefix = "vmt";
+		double m_VelocitySmoothingFactor = 0.1;
 
 		json LoadJson();
 		void SaveJson(json j);
@@ -71,14 +71,13 @@ namespace VMTDriver {
 		void SetRoomMatrix(bool save, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8, float m9, float m10, float m11, float m12);
 
 		Eigen::Matrix4d& GetRoomToDriverMatrix();
-		bool GetVelocityEnable();
+		double GetVelocitySmoothingFactor();
 		int GetReceivePort();
 		std::string GetSendIp();
 		int GetSendPort();
 		bool GetOptoutTrackingRole();
 		bool GetHMDisIndex0();
 		bool GetRejectWhenCannotTracking();
-		bool GetDefaultAutoPoseUpdateOn();
 		std::string GetDriverName();
 		std::string GetSerialPrefix();
 		std::string GetRessourceRenderModelPrefix(eTrackerType type);

@@ -74,23 +74,29 @@ namespace VMTDriver {
 
     //内部姿勢→OpenVR姿勢の変換と、相対座標計算処理を行う
     void TrackedDeviceServerDriver::PredictAndCalcVelocity(DriverPose_t& pose) {
+		// Add some smoothing to velocity. This also adds some minimal prediction effect.
+		double smoothingFactor = Config::GetInstance()->GetVelocitySmoothingFactor();
+
+		if (smoothingFactor <= 0.0)
+			return;
+
+		if (smoothingFactor > 1.0)
+			smoothingFactor = 1.0;
+
         //経過時間を計算
         double delta_time = std::chrono::duration_cast<std::chrono::microseconds>(m_rawPose.time - m_lastRawPose.time).count() / (1000.0 * 1000.0);
         //速度・角速度を計算
         if (delta_time > std::numeric_limits<double>::epsilon())
         {
-			// Add some smoothing to velocity. This also adds some minimal prediction effect.
-			const double smoothing_factor = 0.1;
-
 			Eigen::Vector3d newVel(
 				(m_rawPose.x - m_lastRawPose.x) / delta_time,
 				(m_rawPose.y - m_lastRawPose.y) / delta_time,
 				(m_rawPose.z - m_lastRawPose.z) / delta_time
 			);
 
-			pose.vecVelocity[0] = smoothing_factor * newVel.x() + (1.0 - smoothing_factor) * m_lastVecVeloctiy[0];
-			pose.vecVelocity[1] = smoothing_factor * newVel.y() + (1.0 - smoothing_factor) * m_lastVecVeloctiy[1];
-			pose.vecVelocity[2] = smoothing_factor * newVel.z() + (1.0 - smoothing_factor) * m_lastVecVeloctiy[2];
+			pose.vecVelocity[0] = smoothingFactor * newVel.x() + (1.0 - smoothingFactor) * m_lastVecVeloctiy[0];
+			pose.vecVelocity[1] = smoothingFactor * newVel.y() + (1.0 - smoothingFactor) * m_lastVecVeloctiy[1];
+			pose.vecVelocity[2] = smoothingFactor * newVel.z() + (1.0 - smoothingFactor) * m_lastVecVeloctiy[2];
 
 			m_lastVecVeloctiy[0] = pose.vecVelocity[0];
 			m_lastVecVeloctiy[1] = pose.vecVelocity[1];
@@ -109,9 +115,9 @@ namespace VMTDriver {
             Eigen::Vector3d diffAxis = diffAngle.axis();
             Eigen::Vector3d vecAngularVelocity = diffAxis * angularVelocity;
 
-			pose.vecAngularVelocity[0] = smoothing_factor * vecAngularVelocity.x() + (1.0 - smoothing_factor) * m_lastAngVeloctiy[0];
-			pose.vecAngularVelocity[1] = smoothing_factor * vecAngularVelocity.y() + (1.0 - smoothing_factor) * m_lastAngVeloctiy[1];
-			pose.vecAngularVelocity[2] = smoothing_factor * vecAngularVelocity.z() + (1.0 - smoothing_factor) * m_lastAngVeloctiy[2];
+			pose.vecAngularVelocity[0] = smoothingFactor * vecAngularVelocity.x() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[0];
+			pose.vecAngularVelocity[1] = smoothingFactor * vecAngularVelocity.y() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[1];
+			pose.vecAngularVelocity[2] = smoothingFactor * vecAngularVelocity.z() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[2];
 
 			m_lastAngVeloctiy[0] = pose.vecAngularVelocity[0];
 			m_lastAngVeloctiy[1] = pose.vecAngularVelocity[1];
@@ -351,10 +357,8 @@ namespace VMTDriver {
             return pose;
         }
 
-        //速度エミュレーションが有効な場合、速度・各速度の計算を行い、更新する
-        if (Config::GetInstance()->GetVelocityEnable()) {
-            PredictAndCalcVelocity(pose);
-        }
+		//速度エミュレーションが有効な場合、速度・各速度の計算を行い、更新する
+		PredictAndCalcVelocity(pose);
 
         //トラッキングモードに合わせて処理する
         switch (m_rawPose.mode) {

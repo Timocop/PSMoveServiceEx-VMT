@@ -104,9 +104,9 @@ namespace VMTDriver {
 		{
 			j["RoomMatrix"] = {};
 		}
-		if (!j.contains("VelocityEnable"))
+		if (!j.contains("VelocitySmoothingFactor"))
 		{
-			j["VelocityEnable"] = true;
+			j["VelocitySmoothingFactor"] = 0.1;
 		}
 		if (!j.contains("ReceivePort"))
 		{
@@ -199,9 +199,9 @@ namespace VMTDriver {
 					, 0, 0, 0, 1;
 				SetRoomMatrixStatus(true); //ルーム行列がセットされた
 			}
-			if (j.contains("VelocityEnable"))
+			if (j.contains("VelocitySmoothingFactor"))
 			{
-				m_velocityEnable = j["VelocityEnable"];
+				m_VelocitySmoothingFactor = j["VelocitySmoothingFactor"];
 			}
 			if (j.contains("ReceivePort"))
 			{
@@ -306,9 +306,9 @@ namespace VMTDriver {
 	}
 
 	//速度有効化の取得
-	bool Config::GetVelocityEnable()
+	double Config::GetVelocitySmoothingFactor()
 	{
-		return m_velocityEnable;
+		return m_VelocitySmoothingFactor;
 	}
 
 	//受信ポートの取得
