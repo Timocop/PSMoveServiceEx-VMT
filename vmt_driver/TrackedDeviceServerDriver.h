@@ -61,6 +61,9 @@ namespace VMTDriver {
 		DriverPose_t m_pose{ 0 };
 		RawPose m_rawPose{ 0 };
 		RawPose m_lastRawPose{ 0 };
+		double m_lastVecVeloctiy[3]{ 0 };
+		double m_lastAngVeloctiy[3]{ 0 };
+
 
 		VRInputComponentHandle_t ButtonComponent[8]{ 0 };
 		VRInputComponentHandle_t TriggerComponent[2]{ 0 };
@@ -88,7 +91,7 @@ namespace VMTDriver {
 		void UpdateBatteryProperty(float value);
 		void Reset();
 
-        void CalcVelocity(DriverPose_t& pose);
+        void PredictAndCalcVelocity(DriverPose_t& pose);
         void CalcJoint(DriverPose_t& pose, string serial, ReferMode_t mode, Eigen::Affine3d& RoomToDriverAffin);
         static int SearchDevice(vr::TrackedDevicePose_t* poses, string serial);
         void RejectTracking(DriverPose_t& pose);

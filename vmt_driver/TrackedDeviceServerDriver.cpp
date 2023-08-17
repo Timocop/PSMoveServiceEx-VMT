@@ -80,29 +80,50 @@ namespace VMTDriver {
     }
 
     //内部姿勢→OpenVR姿勢の変換と、相対座標計算処理を行う
-    void TrackedDeviceServerDriver::CalcVelocity(DriverPose_t& pose) {
+    void TrackedDeviceServerDriver::PredictAndCalcVelocity(DriverPose_t& pose) {
         //経過時間を計算
-        double duration_sec = std::chrono::duration_cast<std::chrono::microseconds>((m_rawPose.time - m_lastRawPose.time)).count() / (1000.0 * 1000.0);
+        double delta_time = std::chrono::duration_cast<std::chrono::microseconds>(m_rawPose.time - m_lastRawPose.time).count() / (1000.0 * 1000.0);
         //速度・角速度を計算
-        if (duration_sec > std::numeric_limits<double>::epsilon())
+        if (delta_time > std::numeric_limits<double>::epsilon())
         {
-            pose.vecVelocity[0] = (m_rawPose.x - m_lastRawPose.x) / duration_sec;
-            pose.vecVelocity[1] = (m_rawPose.y - m_lastRawPose.y) / duration_sec;
-            pose.vecVelocity[2] = (m_rawPose.z - m_lastRawPose.z) / duration_sec;
+			// Add some smoothing to velocity. This also adds some minimal prediction effect.
+			const double smoothing_factor = 0.1;
 
-            Eigen::Quaterniond q1(m_rawPose.qw, m_rawPose.qx, m_rawPose.qy, m_rawPose.qz);
-            Eigen::Quaterniond q2(m_lastRawPose.qw, m_lastRawPose.qx, m_lastRawPose.qy, m_lastRawPose.qz);
+			Eigen::Vector3d newVel(
+				(m_rawPose.x - m_lastRawPose.x) / delta_time,
+				(m_rawPose.y - m_lastRawPose.y) / delta_time,
+				(m_rawPose.z - m_lastRawPose.z) / delta_time
+			);
 
-            Eigen::Quaterniond dq = q1 * q2.inverse();
-            Eigen::AngleAxisd dAAx(dq);
-            double angle = dAAx.angle();
-            double angularVelocity = angle / duration_sec;
-            Eigen::Vector3d axis = dAAx.axis();
-            Eigen::Vector3d vecAngularVelocity = axis * angularVelocity;
+			pose.vecVelocity[0] = smoothing_factor * newVel.x() + (1.0 - smoothing_factor) * m_lastVecVeloctiy[0];
+			pose.vecVelocity[1] = smoothing_factor * newVel.y() + (1.0 - smoothing_factor) * m_lastVecVeloctiy[1];
+			pose.vecVelocity[2] = smoothing_factor * newVel.z() + (1.0 - smoothing_factor) * m_lastVecVeloctiy[2];
 
-            pose.vecAngularVelocity[0] = vecAngularVelocity.x();
-            pose.vecAngularVelocity[1] = vecAngularVelocity.y();
-            pose.vecAngularVelocity[2] = vecAngularVelocity.z();
+			m_lastVecVeloctiy[0] = pose.vecVelocity[0];
+			m_lastVecVeloctiy[1] = pose.vecVelocity[1];
+			m_lastVecVeloctiy[2] = pose.vecVelocity[2];
+
+			// Angular Velocity
+            Eigen::Quaterniond newQuat(m_rawPose.qw, m_rawPose.qx, m_rawPose.qy, m_rawPose.qz);
+            Eigen::Quaterniond oldQuat(m_lastRawPose.qw, m_lastRawPose.qx, m_lastRawPose.qy, m_lastRawPose.qz);
+
+            Eigen::Quaterniond diffQuat = newQuat * oldQuat.inverse();
+            Eigen::AngleAxisd diffAngle(diffQuat);
+
+            double angle = diffAngle.angle();
+            double angularVelocity = angle / delta_time;
+
+            Eigen::Vector3d diffAxis = diffAngle.axis();
+            Eigen::Vector3d vecAngularVelocity = diffAxis * angularVelocity;
+
+			pose.vecAngularVelocity[0] = smoothing_factor * vecAngularVelocity.x() + (1.0 - smoothing_factor) * m_lastAngVeloctiy[0];
+			pose.vecAngularVelocity[1] = smoothing_factor * vecAngularVelocity.y() + (1.0 - smoothing_factor) * m_lastAngVeloctiy[1];
+			pose.vecAngularVelocity[2] = smoothing_factor * vecAngularVelocity.z() + (1.0 - smoothing_factor) * m_lastAngVeloctiy[2];
+
+			m_lastAngVeloctiy[0] = pose.vecAngularVelocity[0];
+			m_lastAngVeloctiy[1] = pose.vecAngularVelocity[1];
+			m_lastAngVeloctiy[2] = pose.vecAngularVelocity[2];
+
         }
         else {
             pose.vecVelocity[0] = 0.0f;
@@ -338,8 +359,9 @@ namespace VMTDriver {
         }
 
         //速度エミュレーションが有効な場合、速度・各速度の計算を行い、更新する
-        if (Config::GetInstance()->GetVelocityEnable()) {
-            CalcVelocity(pose);
+		//Velocity updates do not work with pose auto-update enabled.
+        if (!s_autoUpdate && Config::GetInstance()->GetVelocityEnable()) {
+            PredictAndCalcVelocity(pose);
         }
 
         //トラッキングモードに合わせて処理する
