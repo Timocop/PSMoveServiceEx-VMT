@@ -167,6 +167,7 @@ namespace VMTDriver {
 		const char* root_sn = nullptr;
 		const char* serialNumber = nullptr;
 		float batteryValue;
+		int velocityEnable;
 
 		float m1{};
 		float m2{};
@@ -257,6 +258,14 @@ namespace VMTDriver {
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
 					GetServer()->GetDevice(idx).UpdateBatteryProperty(batteryValue);
+				}
+			}
+			else if (adr == "/VMT/Property/Velocity")
+			{
+				args >> idx >> velocityEnable >> osc::EndMessage;
+				if (GetServer()->IsVMTDeviceIndex(idx))
+				{
+					GetServer()->GetDevice(idx).SetVelocity(velocityEnable > 0);
 				}
 			}
 			//すべてのデバイスのリセット

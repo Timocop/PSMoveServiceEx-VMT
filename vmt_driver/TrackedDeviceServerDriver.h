@@ -57,12 +57,15 @@ namespace VMTDriver {
 		TrackedDeviceIndex_t m_deviceIndex{ 0 };
 		PropertyContainerHandle_t m_propertyContainer{ 0 };
 		uint32_t m_index = k_unTrackedDeviceIndexInvalid;
+		bool m_enableVelocity = false;
 
 		DriverPose_t m_pose{ 0 };
 		RawPose m_rawPose{ 0 };
 		RawPose m_lastRawPose{ 0 };
 		double m_lastVecVeloctiy[3]{ 0 };
 		double m_lastAngVeloctiy[3]{ 0 };
+		double m_lastPosition[3]{ 0 };
+		double m_lastRotation[4]{ 0 };
 
 
 		VRInputComponentHandle_t ButtonComponent[8]{ 0 };
@@ -80,6 +83,7 @@ namespace VMTDriver {
 		void SetObjectIndex(uint32_t);
 		void SetPose(DriverPose_t pose);
 		void SetRawPose(RawPose rawPose);
+		void SetVelocity(bool enable);
 		DriverPose_t RawPoseToPose();
 		void RegisterToVRSystem(eTrackerType type);
 		void UpdatePoseToVRSystem();
@@ -90,6 +94,7 @@ namespace VMTDriver {
 		void Reset();
 
         void CalcVelocity(DriverPose_t& pose);
+		void CompensateVelocity(DriverPose_t & pose);
         void CalcJoint(DriverPose_t& pose, string serial, ReferMode_t mode, Eigen::Affine3d& RoomToDriverAffin);
         static int SearchDevice(vr::TrackedDevicePose_t* poses, string serial);
         void RejectTracking(DriverPose_t& pose);

@@ -88,7 +88,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>driver_vmt</TargetName>
+    <TargetName>driver_psmsex</TargetName>
     <OutDir>$(SolutionDir)..\build\vmt\bin\win64\</OutDir>
     <IncludePath>..\;..\openvr\headers;..\eigen-3.3.7;..\oscpack_1_1_0;$(IncludePath)</IncludePath>
     <RunCodeAnalysis>true</RunCodeAnalysis>

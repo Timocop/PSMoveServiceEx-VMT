@@ -72,12 +72,17 @@ namespace VMTDriver {
 		SetPose(RawPoseToPose());
     }
 
+	void TrackedDeviceServerDriver::SetVelocity(bool enable)
+	{
+		m_enableVelocity = enable;
+	}
+
     //内部姿勢→OpenVR姿勢の変換と、相対座標計算処理を行う
     void TrackedDeviceServerDriver::CalcVelocity(DriverPose_t& pose) {
 		// Add some smoothing to velocity. This also adds some minimal prediction effect.
 		double smoothingFactor = Config::GetInstance()->GetVelocitySmoothingFactor();
 
-		if (smoothingFactor <= 0.0)
+		if (smoothingFactor <= 0.00)
 			return;
 
 		if (smoothingFactor > 1.0)
@@ -123,6 +128,7 @@ namespace VMTDriver {
 			m_lastAngVeloctiy[1] = pose.vecAngularVelocity[1];
 			m_lastAngVeloctiy[2] = pose.vecAngularVelocity[2];
 
+			//CompensateVelocity(pose);
         }
         else {
             pose.vecVelocity[0] = 0.0f;
@@ -133,6 +139,93 @@ namespace VMTDriver {
             pose.vecAngularVelocity[2] = 0.0f;
         }
     }
+
+	void TrackedDeviceServerDriver::CompensateVelocity(DriverPose_t& pose)
+	{
+		//経過時間を計算
+		double delta_time = std::chrono::duration_cast<std::chrono::microseconds>(m_rawPose.time - m_lastRawPose.time).count() / (1000.0 * 1000.0);
+		//速度・角速度を計算
+		if (delta_time > std::numeric_limits<double>::epsilon())
+		{
+			//Compensate for position velocity
+			Eigen::Vector3d compPosition(
+				pose.vecPosition[0] - (pose.vecVelocity[0] * delta_time),
+				pose.vecPosition[1] - (pose.vecVelocity[1] * delta_time),
+				pose.vecPosition[2] - (pose.vecVelocity[2] * delta_time));
+
+			//Compensate for angular velocity
+			Eigen::Quaterniond qQuat(
+				pose.qRotation.w,
+				pose.qRotation.x,
+				pose.qRotation.y,
+				pose.qRotation.z
+			);
+			Eigen::Vector3d normVelocity(
+				pose.vecAngularVelocity[0],
+				pose.vecAngularVelocity[1],
+				pose.vecAngularVelocity[2]
+			);
+
+			Eigen::Quaterniond deltaQ(Eigen::AngleAxisd(normVelocity.norm() * delta_time, normVelocity.normalized()));
+			Eigen::Quaterniond compRotation = (qQuat * deltaQ.inverse());
+
+			pose.vecPosition[0] = compPosition[0];
+			pose.vecPosition[1] = compPosition[1];
+			pose.vecPosition[2] = compPosition[2];
+			pose.qRotation.x = compRotation.x();
+			pose.qRotation.y = compRotation.y();
+			pose.qRotation.z = compRotation.z();
+			pose.qRotation.w = compRotation.w();
+		}
+	}
+
+	//void TrackedDeviceServerDriver::PoseSmoothing(DriverPose_t& pose)
+	//{
+	//	// Add some smoothing to velocity. This also adds some minimal prediction effect.
+	//	double smoothingFactor = Config::GetInstance()->GetVelocitySmoothingFactor();
+
+	//	if (smoothingFactor <= 0.0)
+	//		return;
+
+	//	if (smoothingFactor > 1.0)
+	//		smoothingFactor = 1.0;
+
+	//	//経過時間を計算
+	//	double delta_time = std::chrono::duration_cast<std::chrono::microseconds>(m_rawPose.time - m_lastRawPose.time).count() / (1000.0 * 1000.0);
+	//	//速度・角速度を計算
+	//	if (delta_time > std::numeric_limits<double>::epsilon())
+	//	{
+	//		Eigen::Vector3d newPosition(
+	//			smoothingFactor * pose.vecPosition[0] + (1.0 - smoothingFactor) * m_lastPosition[0],
+	//			smoothingFactor * pose.vecPosition[1] + (1.0 - smoothingFactor) * m_lastPosition[1],
+	//			smoothingFactor * pose.vecPosition[2] + (1.0 - smoothingFactor) * m_lastPosition[2]
+	//		);
+
+	//		Eigen::Quaterniond newRotation(
+	//			smoothingFactor * pose.qRotation.x + (1.0 - smoothingFactor) * m_lastRotation[0],
+	//			smoothingFactor * pose.qRotation.y + (1.0 - smoothingFactor) * m_lastRotation[1],
+	//			smoothingFactor * pose.qRotation.z + (1.0 - smoothingFactor) * m_lastRotation[2],
+	//			smoothingFactor * pose.qRotation.w + (1.0 - smoothingFactor) * m_lastRotation[3]
+	//		);
+	//		newRotation.normalize();
+
+	//		pose.vecPosition[0] = newPosition.x();
+	//		pose.vecPosition[1] = newPosition.y();
+	//		pose.vecPosition[2] = newPosition.z();
+	//		pose.qRotation.x = newRotation.x();
+	//		pose.qRotation.y = newRotation.y();
+	//		pose.qRotation.z = newRotation.z();
+	//		pose.qRotation.w = newRotation.w();
+
+	//		m_lastPosition[0] = pose.vecPosition[0];
+	//		m_lastPosition[1] = pose.vecPosition[1];
+	//		m_lastPosition[2] = pose.vecPosition[2];
+	//		m_lastRotation[0] = pose.qRotation.x;
+	//		m_lastRotation[1] = pose.qRotation.y;
+	//		m_lastRotation[2] = pose.qRotation.z;
+	//		m_lastRotation[3] = pose.qRotation.w;
+	//	}
+	//}
 
     //Joint計算を行う
     void TrackedDeviceServerDriver::CalcJoint(DriverPose_t& pose, string serial, ReferMode_t mode, Eigen::Affine3d& RoomToDriverAffin) {
@@ -358,7 +451,10 @@ namespace VMTDriver {
         }
 
 		//速度エミュレーションが有効な場合、速度・各速度の計算を行い、更新する
-		CalcVelocity(pose);
+		if (m_enableVelocity)
+		{
+			CalcVelocity(pose);
+		}
 
         //トラッキングモードに合わせて処理する
         switch (m_rawPose.mode) {
@@ -400,48 +496,60 @@ namespace VMTDriver {
             {
 			case eTrackerType::TrackerType_HtcBasestation:
 				m_trackerType = type;
+
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_TrackingReference, this);
 				m_registrationInProgress = true;
 				break;
 
 			case eTrackerType::TrackerType_HtcRightController:
+				m_enableVelocity = true;
 				m_trackerType = type;
+
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
 				m_registrationInProgress = true;
 				break;
 
 			case eTrackerType::TrackerType_HtcLeftController:
+				m_enableVelocity = true;
 				m_trackerType = type;
+
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
 				m_registrationInProgress = true;
 				break;
 
 			case eTrackerType::TrackerType_HtcTracker:
 				m_trackerType = type;
+
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_GenericTracker, this);
 				m_registrationInProgress = true;
 				break;
 
 			case eTrackerType::TrackerType_TrackingReference:
 				m_trackerType = type;
+
 				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_TrackingReference, this);
 				m_registrationInProgress = true;
 				break;
 
 			case eTrackerType::TrackerType_RightController:
+				m_enableVelocity = true;
 				m_trackerType = type;
+
                 VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
 				m_registrationInProgress = true;
                 break;
 
 			case eTrackerType::TrackerType_LeftController:
+				m_enableVelocity = true;
 				m_trackerType = type;
+
                 VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
 				m_registrationInProgress = true;
                 break;
 
 			case eTrackerType::TrackerType_GenericTracker:
 				m_trackerType = type;
+
                 VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_GenericTracker, this);
 				m_registrationInProgress = true;
                 break;
