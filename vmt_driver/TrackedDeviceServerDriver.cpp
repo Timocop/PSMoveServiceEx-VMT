@@ -73,7 +73,7 @@ namespace VMTDriver {
     }
 
     //内部姿勢→OpenVR姿勢の変換と、相対座標計算処理を行う
-    void TrackedDeviceServerDriver::PredictAndCalcVelocity(DriverPose_t& pose) {
+    void TrackedDeviceServerDriver::CalcVelocity(DriverPose_t& pose) {
 		// Add some smoothing to velocity. This also adds some minimal prediction effect.
 		double smoothingFactor = Config::GetInstance()->GetVelocitySmoothingFactor();
 
@@ -358,7 +358,7 @@ namespace VMTDriver {
         }
 
 		//速度エミュレーションが有効な場合、速度・各速度の計算を行い、更新する
-		PredictAndCalcVelocity(pose);
+		CalcVelocity(pose);
 
         //トラッキングモードに合わせて処理する
         switch (m_rawPose.mode) {
