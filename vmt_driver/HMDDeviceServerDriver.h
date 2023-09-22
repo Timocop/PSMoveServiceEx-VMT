@@ -1,4 +1,4 @@
-/*
+﻿/*
 MIT License
 
 Copyright (c) 2020 gpsnmeajp
@@ -27,30 +27,41 @@ SOFTWARE.
 //OpenVRデバイス
 //サーバーにぶら下がる子である
 namespace VMTDriver {
-    const HmdQuaternion_t HmdQuaternion_Identity{ 1,0,0,0 };
+	struct DisplaySettings {
+		int display_x{};
+		int display_y{};
+		int display_w{};
+		int display_h{};
+		int render_w{};
+		int render_h{};
+		float distortionK0{};
+		float distortionK1{};
+		float distortionScale{};
+		float fov{};
+		int frameRate{};
+	};
 
-    struct RawPose {
-        bool roomToDriver{};
-        int idx{};
-        int enable{};
-        double x{};
-        double y{};
-        double z{};
-        double qx{};
-        double qy{};
-        double qz{};
-        double qw{};
-        double timeoffset{};
-        ReferMode_t mode{};
-        std::string root_sn{};
-        std::chrono::system_clock::time_point time{};
-    };
+	struct RawHmdPose {
+		bool roomToDriver{};
+		int idx{};
+		int enable{};
+		double x{};
+		double y{};
+		double z{};
+		double qx{};
+		double qy{};
+		double qz{};
+		double qw{};
+		double timeoffset{};
+		ReferMode_t mode{};
+		std::string root_sn{};
+		std::chrono::system_clock::time_point time{};
+	};
 
-    //個々のデバイス
-    class TrackedDeviceServerDriver : public ITrackedDeviceServerDriver
-    {
+	//個々のデバイス
+	class HMDDeviceServerDriver : public ITrackedDeviceServerDriver, IVRDisplayComponent
+	{
 	private:
-		eTrackerType m_trackerType = eTrackerType::TrackerType_Invalid;
 		bool m_alreadyRegistered = false;
 		bool m_registrationInProgress = false;
 		string m_serial = "";
@@ -60,47 +71,39 @@ namespace VMTDriver {
 		bool m_enableVelocity = false;
 
 		DriverPose_t m_pose{ 0 };
-		RawPose m_rawPose{ 0 };
-		RawPose m_lastRawPose{ 0 };
+		RawHmdPose m_rawPose{ 0 };
+		RawHmdPose m_lastRawPose{ 0 };
 		double m_lastVecVeloctiy[3]{ 0 };
 		double m_lastAngVeloctiy[3]{ 0 };
 		double m_lastPosition[3]{ 0 };
 		double m_lastRotation[4]{ 0 };
-
-
-		VRInputComponentHandle_t ButtonComponent[8]{ 0 };
-		VRInputComponentHandle_t TriggerComponent[2]{ 0 };
-		VRInputComponentHandle_t JoystickComponent[2]{ 0 };
-		VRInputComponentHandle_t HapticComponent{ 0 };
+		DisplaySettings m_displaySettings{ 0 };
+		bool m_displayValid = false;
 
 		bool m_poweron = false;
 	public:
 		//内部向け
-		TrackedDeviceServerDriver();
-		~TrackedDeviceServerDriver();
+		HMDDeviceServerDriver();
+		~HMDDeviceServerDriver();
 
 		void SetDeviceSerial(string);
 		void SetObjectIndex(uint32_t);
 		void SetPose(DriverPose_t pose);
-		void SetRawPose(RawPose rawPose);
+		void SetRawPose(RawHmdPose rawPose);
+		void SetDisplaySettings(DisplaySettings displaySettings);
 		void SetVelocity(bool enable);
 		DriverPose_t RawPoseToPose();
-		void RegisterToVRSystem(eTrackerType type);
+		void RegisterToVRSystem();
 		void UpdatePoseToVRSystem();
-		void UpdateButtonInput(uint32_t index, bool value, double timeoffset);
-		void UpdateTriggerInput(uint32_t index, float value, double timeoffset);
-		void UpdateJoystickInput(uint32_t index, float x, float y, double timeoffset);
-		void UpdateBatteryProperty(float value);
 		void Reset();
 
-        void CalcVelocity(DriverPose_t& pose);
-		void CompensateVelocity(DriverPose_t & pose);
-        void CalcJoint(DriverPose_t& pose, string serial, ReferMode_t mode, Eigen::Affine3d& RoomToDriverAffin);
-        static int SearchDevice(vr::TrackedDevicePose_t* poses, string serial);
-        void RejectTracking(DriverPose_t& pose);
-        void ProcessEvent(VREvent_t &VREvent);
+		void CalcVelocity(DriverPose_t& pose);
+		void CalcJoint(DriverPose_t& pose, string serial, ReferMode_t mode, Eigen::Affine3d& RoomToDriverAffin);
+		static int SearchDevice(vr::TrackedDevicePose_t* poses, string serial);
+		void RejectTracking(DriverPose_t& pose);
+		void ProcessEvent(VREvent_t &VREvent);
 
-        static bool GetDevicePose(Eigen::Affine3d& out_pose, const char* in_serialNumber);
+		static bool GetDevicePose(Eigen::Affine3d& out_pose, const char* in_serialNumber);
 
 		//OpenVR向け
 		virtual EVRInitError Activate(uint32_t unObjectId) override;
@@ -108,7 +111,15 @@ namespace VMTDriver {
 		virtual void EnterStandby() override;
 		virtual void* GetComponent(const char* pchComponentNameAndVersion) override;
 		virtual void DebugRequest(const char* pchRequest, char* pchResponseBuffer, uint32_t unResponseBufferSize) override;
-		virtual DriverPose_t GetPose() override; 
-		
-    };
+		virtual DriverPose_t GetPose() override;
+
+		// IVRDisplayComponent
+		virtual void GetWindowBounds(int32_t* pnX, int32_t* pnY, uint32_t* pnWidth, uint32_t* pnHeight) override;
+		virtual bool IsDisplayOnDesktop() override;
+		virtual bool IsDisplayRealDisplay() override;
+		virtual void GetRecommendedRenderTargetSize(uint32_t* pnWidth, uint32_t* pnHeight) override;
+		virtual void GetEyeOutputViewport(EVREye eEye, uint32_t* pnX, uint32_t* pnY, uint32_t* pnWidth, uint32_t* pnHeight) override;
+		virtual void GetProjectionRaw(EVREye eEye, float* pfLeft, float* pfRight, float* pfTop, float* pfBottom) override;
+		virtual DistortionCoordinates_t ComputeDistortion(EVREye eEye, float fU, float fV) override;
+	};
 }

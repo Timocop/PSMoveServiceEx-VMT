@@ -31,6 +31,7 @@ namespace VMTDriver {
     {
     private:
         vector<TrackedDeviceServerDriver> m_devices;
+		vector<HMDDeviceServerDriver> m_hmd;
         IVRDriverContext* m_pDriverContext = nullptr;
         string m_installPath = "";
 
@@ -38,6 +39,7 @@ namespace VMTDriver {
         //内部向け
         vector<TrackedDeviceServerDriver>& GetDevices();
         TrackedDeviceServerDriver& GetDevice(int index);
+		HMDDeviceServerDriver& GetHmdDevice();
         void DeviceResetAll();
         bool IsVMTDeviceIndex(int index);
         string GetInstallPath();

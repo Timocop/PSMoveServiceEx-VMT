@@ -48,6 +48,7 @@ using json = nlohmann::json;
 namespace VMTDriver {
 	class ServerTrackedDeviceProvider;
 	class TrackedDeviceServerDriver;
+	class HMDDeviceServerDriver;
 	class VRWatchdogProvider;
 	class Log;
 
@@ -61,7 +62,7 @@ namespace VMTDriver {
 		TrackerType_HtcTracker,
 		TrackerType_HtcLeftController,
 		TrackerType_HtcRightController,
-		TrackerType_HtcBasestation,
+		TrackerType_HtcBasestation
 	};
 
 	enum class ReferMode_t {
@@ -81,6 +82,7 @@ namespace DirectOSC {
 #include "DirectOSC.h"
 #include "ServerTrackedDeviceProvider.h"
 #include "TrackedDeviceServerDriver.h"
+#include "HMDDeviceServerDriver.h"
 #include "VRWatchdogProvider.h"
 #include "Log.h"
 #include "CommunicationManager.h"

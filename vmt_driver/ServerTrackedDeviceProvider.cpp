@@ -25,17 +25,23 @@ SOFTWARE.
 namespace VMTDriver {
     //** 内部向け関数群 **
 
-    //全仮想デバイスを返す
-    vector<TrackedDeviceServerDriver>& ServerTrackedDeviceProvider::GetDevices()
-    {
-        return m_devices;
-    }
+	//全仮想デバイスを返す
+	vector<TrackedDeviceServerDriver>& ServerTrackedDeviceProvider::GetDevices()
+	{
+		return m_devices;
+	}
 
-    //特定仮想デバイスを返す
-    TrackedDeviceServerDriver& ServerTrackedDeviceProvider::GetDevice(int index)
-    {
-        return m_devices[index];
-    }
+	//特定仮想デバイスを返す
+	TrackedDeviceServerDriver& ServerTrackedDeviceProvider::GetDevice(int index)
+	{
+		return m_devices[index];
+	}
+
+	//特定仮想デバイスを返す
+	HMDDeviceServerDriver& ServerTrackedDeviceProvider::GetHmdDevice()
+	{
+		return m_hmd[0];
+	}
 
     //全仮想デバイスにリセットを指示する
     void ServerTrackedDeviceProvider::DeviceResetAll()
@@ -44,6 +50,7 @@ namespace VMTDriver {
         {
             m_devices[i].Reset();
         }
+		m_hmd[0].Reset();
     }
 
     //仮想デバイス内部インデックスの範囲内に収まっているかをチェックする
@@ -117,6 +124,7 @@ namespace VMTDriver {
 
         //仮想デバイスを準備
         m_devices.resize(58); //58デバイス(全合計64に満たないくらい)
+		m_hmd.resize(1);
 
         //仮想デバイスを初期化
         for (int i = 0; i < m_devices.size(); i++)
@@ -130,6 +138,16 @@ namespace VMTDriver {
             //仮想デバイス内部インデックス(OpenVRのindexではなく、Listのindex)をセット
             m_devices[i].SetObjectIndex(i);
         }
+
+		{
+			//シリアル番号を準備
+			string name = Config::GetInstance()->GetSerialPrefix();
+			name.append("_HMD");
+			m_hmd[0].SetDeviceSerial(name);
+
+			//仮想デバイス内部インデックス(OpenVRのindexではなく、Listのindex)をセット
+			m_hmd[0].SetObjectIndex(0);
+		}
 
         //起動完了
         Log::Output("Startup OK");
@@ -168,6 +186,7 @@ namespace VMTDriver {
         {
             m_devices[i].UpdatePoseToVRSystem();
         }
+		m_hmd[0].UpdatePoseToVRSystem();
 
         //OpenVRイベントの取得
         VREvent_t VREvent;
@@ -178,6 +197,7 @@ namespace VMTDriver {
         {
             m_devices[i].ProcessEvent(VREvent);
         }
+		m_hmd[0].ProcessEvent(VREvent);
     }
 
     //OpenVRからのスタンバイブロック問い合わせ

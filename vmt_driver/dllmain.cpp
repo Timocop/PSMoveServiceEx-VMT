@@ -28,11 +28,11 @@ namespace VMTDriver {
     static ServerTrackedDeviceProvider g_ServerTrackedDeviceProvider;
     static VRWatchdogProvider g_VRWatchdogProvider;
 
-    //ServerTrackedDeviceProviderのインスタンスを返す
-    ServerTrackedDeviceProvider* VMTDriver::GetServer()
-    {
-        return &g_ServerTrackedDeviceProvider;
-    }
+	//ServerTrackedDeviceProviderのインスタンスを返す
+	ServerTrackedDeviceProvider* VMTDriver::GetServer()
+	{
+		return &g_ServerTrackedDeviceProvider;
+	}
 
     //VRWatchdogProviderのインスタンスを返す
     VRWatchdogProvider* VMTDriver::GetWatchdog()

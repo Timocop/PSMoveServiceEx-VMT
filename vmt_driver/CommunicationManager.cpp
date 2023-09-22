@@ -33,10 +33,10 @@ namespace VMTDriver {
 
 	//姿勢を各仮想デバイスに設定する
 	void OSCReceiver::SetPose(bool roomToDriver, int idx, int enable,
-	                          double x, double y, double z,
-	                          double qx, double qy, double qz, double qw,
-	                          double timeoffset,
-	                          const char* root_sn, ReferMode_t mode)
+		double x, double y, double z,
+		double qx, double qy, double qz, double qw,
+		double timeoffset,
+		const char* root_sn, ReferMode_t mode)
 	{
 		RawPose pose{};
 		pose.roomToDriver = roomToDriver;
@@ -60,6 +60,64 @@ namespace VMTDriver {
 			GetServer()->GetDevice(idx).RegisterToVRSystem((eTrackerType)enable);
 			GetServer()->GetDevice(idx).SetRawPose(pose);
 		}
+	}
+
+	//姿勢を各仮想デバイスに設定する
+	void OSCReceiver::SetHmdPose(bool roomToDriver,
+		double x, double y, double z,
+		double qx, double qy, double qz, double qw,
+		double timeoffset,
+		const char* root_sn, ReferMode_t mode)
+	{
+		RawHmdPose pose{};
+		pose.roomToDriver = roomToDriver;
+		pose.idx = -1;
+		pose.enable = 1;
+		pose.x = x;
+		pose.y = y;
+		pose.z = z;
+		pose.qx = qx;
+		pose.qy = qy;
+		pose.qz = qz;
+		pose.qw = qw;
+
+		pose.timeoffset = timeoffset;
+		pose.mode = mode;
+		pose.root_sn = root_sn ? root_sn : "";
+		pose.time = std::chrono::system_clock::now();
+
+		//範囲チェック
+		GetServer()->GetHmdDevice().RegisterToVRSystem();
+		GetServer()->GetHmdDevice().SetRawPose(pose);
+	}
+
+	//姿勢を各仮想デバイスに設定する
+	void OSCReceiver::SetHmdDisplaySettings(
+		int display_x, int display_y, int display_w, int display_h,
+		int render_w, int render_h,
+		float distortionK0, float distortionK1, float distortionScale,
+		float fov, int frameRate)
+	{
+		DisplaySettings displaySettings{};
+		
+		displaySettings.display_x = display_x;
+		displaySettings.display_y = display_y;
+		displaySettings.display_w = display_w;
+		displaySettings.display_h = display_h;
+
+		displaySettings.render_w = render_w;
+		displaySettings.render_h = render_h;
+
+		displaySettings.distortionK0 = distortionK0;
+		displaySettings.distortionK1 = distortionK1;
+		displaySettings.distortionScale = distortionScale;
+
+		// FOV to rad
+		displaySettings.fov = fov * (3.14159265358979323846f / 180.f);
+
+		displaySettings.frameRate = frameRate;
+
+		GetServer()->GetHmdDevice().SetDisplaySettings(displaySettings);
 	}
 
 	//ログ情報を送信する(ダイアログを表示する)
@@ -169,6 +227,19 @@ namespace VMTDriver {
 		float batteryValue;
 		int velocityEnable;
 
+		int display_x{};
+		int display_y{};
+		int display_w{};
+		int display_h{};
+		int render_w{};
+		int render_h{};
+
+		float distortionK0{};
+		float distortionK1{};
+		float distortionScale{};
+		float fov{};
+		int frameRate{};
+		 
 		float m1{};
 		float m2{};
 		float m3{};
@@ -227,6 +298,56 @@ namespace VMTDriver {
 				args >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
 				SetPose(false, idx, enable, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Follow);
 			}
+			
+			// HMD
+			else if (adr == "/VMT/HMD/Room/Unity")
+			{
+				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
+				SetHmdPose(true, x, y, -z, qx, qy, -qz, -qw, timeoffset);
+			}
+			else if (adr == "/VMT/HMD/Room/Driver")
+			{
+				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
+				SetHmdPose(true, x, y, z, qx, qy, qz, qw, timeoffset);
+			}
+			else if (adr == "/VMT/HMD/Raw/Unity")
+			{
+				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
+				SetHmdPose(false, x, y, -z, qx, qy, -qz, -qw, timeoffset);
+			}
+			else if (adr == "/VMT/HMD/Raw/Driver")
+			{
+				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
+				SetHmdPose(false, x, y, z, qx, qy, qz, qw, timeoffset);
+			}
+			else if (adr == "/VMT/HMD/Joint/Unity")
+			{
+				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
+				SetHmdPose(false, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Joint);
+			}
+			else if (adr == "/VMT/HMD/Joint/Driver")
+			{
+				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
+				SetHmdPose(false, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Joint);
+			}
+			else if (adr == "/VMT/HMD/Follow/Unity")
+			{
+				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
+				SetHmdPose(false, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Follow);
+			}
+			else if (adr == "/VMT/HMD/Follow/Driver")
+			{
+				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
+				SetHmdPose(false, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Follow);
+			}
+
+			// HMD Settings
+			else if (adr == "/VMT/HMD/Display")
+			{
+				args >> display_x >> display_y >> display_w >> display_h >> render_w >> render_h >> distortionK0 >> distortionK1 >> distortionScale >> fov >> frameRate >> osc::EndMessage;
+				SetHmdDisplaySettings(display_x, display_y, display_w, display_h, render_w, render_h, distortionK0, distortionK1, distortionScale, fov, frameRate);
+			}
+
 			//デバイス入力系の受信
 			else if (adr == "/VMT/Input/Button")
 			{

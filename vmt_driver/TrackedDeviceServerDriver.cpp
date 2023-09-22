@@ -179,54 +179,6 @@ namespace VMTDriver {
 		}
 	}
 
-	//void TrackedDeviceServerDriver::PoseSmoothing(DriverPose_t& pose)
-	//{
-	//	// Add some smoothing to velocity. This also adds some minimal prediction effect.
-	//	double smoothingFactor = Config::GetInstance()->GetVelocitySmoothingFactor();
-
-	//	if (smoothingFactor <= 0.0)
-	//		return;
-
-	//	if (smoothingFactor > 1.0)
-	//		smoothingFactor = 1.0;
-
-	//	//経過時間を計算
-	//	double delta_time = std::chrono::duration_cast<std::chrono::microseconds>(m_rawPose.time - m_lastRawPose.time).count() / (1000.0 * 1000.0);
-	//	//速度・角速度を計算
-	//	if (delta_time > std::numeric_limits<double>::epsilon())
-	//	{
-	//		Eigen::Vector3d newPosition(
-	//			smoothingFactor * pose.vecPosition[0] + (1.0 - smoothingFactor) * m_lastPosition[0],
-	//			smoothingFactor * pose.vecPosition[1] + (1.0 - smoothingFactor) * m_lastPosition[1],
-	//			smoothingFactor * pose.vecPosition[2] + (1.0 - smoothingFactor) * m_lastPosition[2]
-	//		);
-
-	//		Eigen::Quaterniond newRotation(
-	//			smoothingFactor * pose.qRotation.x + (1.0 - smoothingFactor) * m_lastRotation[0],
-	//			smoothingFactor * pose.qRotation.y + (1.0 - smoothingFactor) * m_lastRotation[1],
-	//			smoothingFactor * pose.qRotation.z + (1.0 - smoothingFactor) * m_lastRotation[2],
-	//			smoothingFactor * pose.qRotation.w + (1.0 - smoothingFactor) * m_lastRotation[3]
-	//		);
-	//		newRotation.normalize();
-
-	//		pose.vecPosition[0] = newPosition.x();
-	//		pose.vecPosition[1] = newPosition.y();
-	//		pose.vecPosition[2] = newPosition.z();
-	//		pose.qRotation.x = newRotation.x();
-	//		pose.qRotation.y = newRotation.y();
-	//		pose.qRotation.z = newRotation.z();
-	//		pose.qRotation.w = newRotation.w();
-
-	//		m_lastPosition[0] = pose.vecPosition[0];
-	//		m_lastPosition[1] = pose.vecPosition[1];
-	//		m_lastPosition[2] = pose.vecPosition[2];
-	//		m_lastRotation[0] = pose.qRotation.x;
-	//		m_lastRotation[1] = pose.qRotation.y;
-	//		m_lastRotation[2] = pose.qRotation.z;
-	//		m_lastRotation[3] = pose.qRotation.w;
-	//	}
-	//}
-
     //Joint計算を行う
     void TrackedDeviceServerDriver::CalcJoint(DriverPose_t& pose, string serial, ReferMode_t mode, Eigen::Affine3d& RoomToDriverAffin) {
         vr::TrackedDevicePose_t devicePoses[k_unMaxTrackedDeviceCount]{};
@@ -754,17 +706,17 @@ namespace VMTDriver {
 
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_RenderModelName_String, "lh_basestation_vive");
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ManufacturerName_String, "HTC");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ResourceRoot_String, "lighthouse");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ResourceRoot_String, "htc");
 			VRProperties()->SetInt32Property(m_propertyContainer, Prop_DeviceClass_Int32, TrackedDeviceClass_TrackingReference);
 
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceOff_String, "{lighthouse}/icons/base_status_off.png");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearching_String, "{lighthouse}/icons/base_status_searching.gif");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearchingAlert_String, "{lighthouse}/icons/base_status_searching_alert.gif");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReady_String, "{lighthouse}/icons/base_status_ready.png");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReadyAlert_String, "{lighthouse}/icons/base_status_ready_alert.png");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceNotReady_String, "{lighthouse}/icons/base_status_error.png");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceStandby_String, "{lighthouse}/icons/base_status_standby.png");
-			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceAlertLow_String, "{lighthouse}/icons/base_status_ready_low.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceOff_String, "{htc}/icons/base_status_off.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearching_String, "{htc}/icons/base_status_searching.gif");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearchingAlert_String, "{htc}/icons/base_status_searching_alert.gif");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReady_String, "{htc}/icons/base_status_ready.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReadyAlert_String, "{htc}/icons/base_status_ready_alert.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceNotReady_String, "{htc}/icons/base_status_error.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceStandby_String, "{htc}/icons/base_status_standby.png");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceAlertLow_String, "{htc}/icons/base_status_error.png");
 
 			break;
 		}

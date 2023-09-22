@@ -26,7 +26,7 @@ SOFTWARE.
 
 //通信系の処理の管理、OSC情報の送受信を行う
 namespace VMTDriver {
-	const string Version = "VMTX_014";
+	const string Version = "VMTX_015";
 
 	class OSCReceiver : public osc::OscPacketListener {
 	private:
@@ -36,6 +36,19 @@ namespace VMTDriver {
 		             double timeoffset,
 		             const char* root_sn = nullptr,
 		             ReferMode_t mode = ReferMode_t::None);
+		void SetHmdPose(bool roomToDriver, 
+			double x, double y, double z, 
+			double qx, double qy, double qz, double qw, 
+			double timeoffset, 
+			const char * root_sn = nullptr,
+			ReferMode_t mode = ReferMode_t::None);
+
+		void SetHmdDisplaySettings(
+			int display_x, int display_y, int display_w, int display_h,
+			int render_w, int render_h, 
+			float distortionK0, float distortionK1, float distortionScale,
+			float fov, int frameRate);
+
 		virtual void ProcessMessage(const osc::ReceivedMessage& m, const IpEndpointName& remoteEndpoint) override;
 	public:
 		static void OSCReceiver::SendLog(int stat, string msg);
