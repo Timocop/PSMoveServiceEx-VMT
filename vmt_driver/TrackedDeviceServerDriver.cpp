@@ -557,6 +557,8 @@ namespace VMTDriver {
 	void TrackedDeviceServerDriver::UpdateBatteryProperty(float value)
 	{
 		if (!m_alreadyRegistered) { return; } 
+		if(m_propertyContainer == k_ulInvalidPropertyContainer) { return; }
+
 		if (value > 1.0) {
 			value = 1.0;
 		}

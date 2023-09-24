@@ -91,15 +91,13 @@ namespace VMTDriver {
 		GetServer()->GetHmdDevice().SetRawPose(pose);
 	}
 
-	//姿勢を各仮想デバイスに設定する
-	void OSCReceiver::SetHmdDisplaySettings(
+	void OSCReceiver::SetupHmdDisplaySettings(
 		int display_x, int display_y, int display_w, int display_h,
 		int render_w, int render_h,
-		float distortionK0, float distortionK1, float distortionScale,
-		float fov, int frameRate)
+		int frameRate)
 	{
 		DisplaySettings displaySettings{};
-		
+
 		displaySettings.display_x = display_x;
 		displaySettings.display_y = display_y;
 		displaySettings.display_w = display_w;
@@ -108,16 +106,29 @@ namespace VMTDriver {
 		displaySettings.render_w = render_w;
 		displaySettings.render_h = render_h;
 
-		displaySettings.distortionK0 = distortionK0;
-		displaySettings.distortionK1 = distortionK1;
-		displaySettings.distortionScale = distortionScale;
-
-		// FOV to rad
-		displaySettings.fov = fov * (3.14159265358979323846f / 180.f);
-
 		displaySettings.frameRate = frameRate;
 
-		GetServer()->GetHmdDevice().SetDisplaySettings(displaySettings);
+		GetServer()->GetHmdDevice().SetupDisplaySettings(displaySettings);
+	}
+
+	void OSCReceiver::SetupHmdRenderSettings(
+		float distortionK0, float distortionK1, float distortionScale,
+		float distortionBlueOffset, float distortionGreenOffset, float distortionRedOffset,
+		float hFov, float vFov)
+	{
+		RenderSettings renderSettings{};
+		renderSettings.distortionK0 = distortionK0;
+		renderSettings.distortionK1 = distortionK1;
+		renderSettings.distortionScale = distortionScale;
+		renderSettings.distortionBlueOffset = distortionBlueOffset;
+		renderSettings.distortionGreenOffset = distortionGreenOffset;
+		renderSettings.distortionRedOffset = distortionRedOffset;
+
+		// FOV to rad
+		renderSettings.hFov = hFov * (3.14159265358979323846f / 180.f);
+		renderSettings.vFov = vFov * (3.14159265358979323846f / 180.f);
+
+		GetServer()->GetHmdDevice().SetupRenderSettings(renderSettings);
 	}
 
 	//ログ情報を送信する(ダイアログを表示する)
@@ -237,8 +248,14 @@ namespace VMTDriver {
 		float distortionK0{};
 		float distortionK1{};
 		float distortionScale{};
-		float fov{};
+		float distortionBlueOffset{};
+		float distortionGreenOffset{};
+		float distortionRedOffset{};
+		float hFov{};
+		float vFov{};
 		int frameRate{};
+
+		float fIpdMeters{};
 		 
 		float m1{};
 		float m2{};
@@ -342,10 +359,20 @@ namespace VMTDriver {
 			}
 
 			// HMD Settings
-			else if (adr == "/VMT/HMD/Display")
+			else if (adr == "/VMT/HMD/SetupDisplay")
 			{
-				args >> display_x >> display_y >> display_w >> display_h >> render_w >> render_h >> distortionK0 >> distortionK1 >> distortionScale >> fov >> frameRate >> osc::EndMessage;
-				SetHmdDisplaySettings(display_x, display_y, display_w, display_h, render_w, render_h, distortionK0, distortionK1, distortionScale, fov, frameRate);
+				args >> display_x >> display_y >> display_w >> display_h >> render_w >> render_h >> frameRate >> osc::EndMessage;
+				SetupHmdDisplaySettings(display_x, display_y, display_w, display_h, render_w, render_h, frameRate);
+			}
+			else if (adr == "/VMT/HMD/SetupRender")
+			{
+				args >> distortionK0 >> distortionK1 >> distortionScale >> distortionRedOffset >> distortionGreenOffset >> distortionBlueOffset >> hFov >> vFov >> osc::EndMessage;
+				SetupHmdRenderSettings(distortionK0, distortionK1, distortionScale, distortionRedOffset, distortionGreenOffset, distortionBlueOffset, hFov, vFov);
+			}
+			else if (adr == "/VMT/HMD/SetIpdMeters")
+			{
+				args >> fIpdMeters >> osc::EndMessage;
+				GetServer()->GetHmdDevice().SetIpdMeters(fIpdMeters);
 			}
 
 			//デバイス入力系の受信

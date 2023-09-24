@@ -35,6 +35,8 @@ namespace VMTDriver {
 	{
 		m_deviceIndex = k_unTrackedDeviceIndexInvalid;
 		m_propertyContainer = k_ulInvalidPropertyContainer;
+
+		m_userIpdMeters = 0.067f;
 	}
 
 	//仮想デバイスのデストラクタ。(Listから暗黙的にコールされる)
@@ -73,10 +75,45 @@ namespace VMTDriver {
 	}
 
 	//仮想デバイスに内部姿勢を設定
-	void HMDDeviceServerDriver::SetDisplaySettings(DisplaySettings displaySettings)
+	void HMDDeviceServerDriver::SetupDisplaySettings(DisplaySettings displaySettings)
 	{
+		if (m_alreadyRegistered || m_registrationInProgress)
+			return;
+
 		m_displaySettings = displaySettings;
 		m_displayValid = true;
+	}
+
+	void HMDDeviceServerDriver::SetupRenderSettings(RenderSettings renderSettings)
+	{
+		if (m_alreadyRegistered || m_registrationInProgress)
+			return;
+
+		m_renderSettings = renderSettings;
+		m_renderValid = true;
+	}
+
+	void HMDDeviceServerDriver::SetIpdMeters(float userIpdMeters)
+	{
+		if (!m_alreadyRegistered) { return; }
+		if (m_propertyContainer == k_ulInvalidPropertyContainer) { return; }
+
+		if (userIpdMeters > 1.0) {
+			userIpdMeters = 1.0;
+		}
+		if (userIpdMeters < 0) {
+			userIpdMeters = 0;
+		}
+		if (isnan(userIpdMeters)) {
+			userIpdMeters = 0;
+		}
+
+		if (m_userIpdMeters == userIpdMeters)
+			return;
+
+		m_userIpdMeters = userIpdMeters;
+
+		VRProperties()->SetFloatProperty(m_propertyContainer, Prop_UserIpdMeters_Float, m_userIpdMeters);
 	}
 
 	void HMDDeviceServerDriver::SetVelocity(bool enable)
@@ -410,7 +447,7 @@ namespace VMTDriver {
 	void HMDDeviceServerDriver::RegisterToVRSystem()
 	{
 		// Set up display first.
-		if (!m_displayValid)
+		if (!m_displayValid || !m_renderValid)
 			return;
 
 		if (!m_alreadyRegistered && !m_registrationInProgress)
@@ -536,7 +573,7 @@ namespace VMTDriver {
 		VRProperties()->SetStringProperty(m_propertyContainer, Prop_ResourceRoot_String, "htc");
 		VRProperties()->SetInt32Property(m_propertyContainer, Prop_DeviceClass_Int32, TrackedDeviceClass_HMD);
 
-		VRProperties()->SetFloatProperty(m_propertyContainer, Prop_UserIpdMeters_Float, 0.067f);
+		VRProperties()->SetFloatProperty(m_propertyContainer, Prop_UserIpdMeters_Float, m_userIpdMeters);
 		VRProperties()->SetFloatProperty(m_propertyContainer, Prop_UserHeadToEyeDepthMeters_Float, 0.0f);
 		VRProperties()->SetFloatProperty(m_propertyContainer, Prop_DisplayFrequency_Float, static_cast<float>(m_displaySettings.frameRate));
 		VRProperties()->SetFloatProperty(m_propertyContainer, Prop_SecondsFromVsyncToPhotons_Float, 0.011f);
@@ -656,27 +693,36 @@ namespace VMTDriver {
 
 	void HMDDeviceServerDriver::GetProjectionRaw(EVREye eEye, float* pfLeft, float* pfRight, float* pfTop, float* pfBottom)
 	{
-		*pfTop = -tan(m_displaySettings.fov / 2);
-		*pfBottom = tan(m_displaySettings.fov / 2);
-		*pfLeft = -tan(m_displaySettings.fov / 2);
-		*pfRight = tan(m_displaySettings.fov / 2);
+		*pfTop = -tan(m_renderSettings.vFov / 2);
+		*pfBottom = tan(m_renderSettings.vFov / 2);
+		*pfLeft = -tan(m_renderSettings.hFov / 2);
+		*pfRight = tan(m_renderSettings.hFov / 2);
 	}
 
 	DistortionCoordinates_t HMDDeviceServerDriver::ComputeDistortion(EVREye eEye, float fU, float fV)
 	{
 		const float r2 = (fU - 0.5f) * (fU - 0.5f) + (fV - 0.5f) * (fV - 0.5f);
 		const float r4 = r2 * r2;
-		const float dist = (1.0f + m_displaySettings.distortionK0 * r2 + m_displaySettings.distortionK1 * r4);
-		fU = (((fU * 2.0f - 1.0f) * dist) * m_displaySettings.distortionScale + 1.0f) * 0.5f;
-		fV = (((fV * 2.0f - 1.0f) * dist) * m_displaySettings.distortionScale + 1.0f) * 0.5f;
+		const float dist = (1.0f + m_renderSettings.distortionK0 * r2 + m_renderSettings.distortionK1 * r4);
+
+		float fBlueScale = (m_renderSettings.distortionScale + m_renderSettings.distortionBlueOffset);
+		float fGreenScale = (m_renderSettings.distortionScale + m_renderSettings.distortionGreenOffset);
+		float fRedScale = (m_renderSettings.distortionScale + m_renderSettings.distortionRedOffset);
+
+		float fBlueU = (((fU * 2.0f - 1.0f) * dist) * fBlueScale + 1.0f) * 0.5f;
+		float fBlueV = (((fV * 2.0f - 1.0f) * dist) * fBlueScale + 1.0f) * 0.5f;
+		float fGreenU = (((fU * 2.0f - 1.0f) * dist) * fGreenScale + 1.0f) * 0.5f;
+		float fGreenV = (((fV * 2.0f - 1.0f) * dist) * fGreenScale + 1.0f) * 0.5f;
+		float fRedU = (((fU * 2.0f - 1.0f) * dist) * fRedScale + 1.0f) * 0.5f;
+		float fRedV = (((fV * 2.0f - 1.0f) * dist) * fRedScale + 1.0f) * 0.5f;
 
 		vr::DistortionCoordinates_t oDistortion{};
-		oDistortion.rfBlue[0] = fU;
-		oDistortion.rfBlue[1] = fV;
-		oDistortion.rfGreen[0] = fU;
-		oDistortion.rfGreen[1] = fV;
-		oDistortion.rfRed[0] = fU;
-		oDistortion.rfRed[1] = fV;
+		oDistortion.rfBlue[0] = fBlueU;
+		oDistortion.rfBlue[1] = fBlueV;
+		oDistortion.rfGreen[0] = fGreenU;
+		oDistortion.rfGreen[1] = fGreenV;
+		oDistortion.rfRed[0] = fRedU;
+		oDistortion.rfRed[1] = fRedV;
 		return oDistortion;
 	}
 }

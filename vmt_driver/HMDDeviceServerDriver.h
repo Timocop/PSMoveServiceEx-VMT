@@ -34,11 +34,18 @@ namespace VMTDriver {
 		int display_h{};
 		int render_w{};
 		int render_h{};
+		int frameRate{};
+	};
+
+	struct RenderSettings {
 		float distortionK0{};
 		float distortionK1{};
 		float distortionScale{};
-		float fov{};
-		int frameRate{};
+		float distortionBlueOffset{};
+		float distortionGreenOffset{};
+		float distortionRedOffset{};
+		float hFov{};
+		float vFov{};
 	};
 
 	struct RawHmdPose {
@@ -78,7 +85,11 @@ namespace VMTDriver {
 		double m_lastPosition[3]{ 0 };
 		double m_lastRotation[4]{ 0 };
 		DisplaySettings m_displaySettings{ 0 };
+		RenderSettings m_renderSettings{ 0 };
 		bool m_displayValid = false;
+		bool m_renderValid = false;
+
+		float m_userIpdMeters{};
 
 		bool m_poweron = false;
 	public:
@@ -90,7 +101,9 @@ namespace VMTDriver {
 		void SetObjectIndex(uint32_t);
 		void SetPose(DriverPose_t pose);
 		void SetRawPose(RawHmdPose rawPose);
-		void SetDisplaySettings(DisplaySettings displaySettings);
+		void SetupDisplaySettings(DisplaySettings displaySettings);
+		void SetupRenderSettings(RenderSettings displaySettings);
+		void SetIpdMeters(float userIpdMeters);
 		void SetVelocity(bool enable);
 		DriverPose_t RawPoseToPose();
 		void RegisterToVRSystem();
