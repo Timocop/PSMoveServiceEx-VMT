@@ -152,27 +152,25 @@ namespace VMTDriver {
 			m_lastVecVeloctiy[2] = pose.vecVelocity[2];
 
 			// Angular Velocity
-			Eigen::Quaterniond newQuat(m_rawPose.qw, m_rawPose.qx, m_rawPose.qy, m_rawPose.qz);
-			Eigen::Quaterniond oldQuat(m_lastRawPose.qw, m_lastRawPose.qx, m_lastRawPose.qy, m_lastRawPose.qz);
+			//Eigen::Quaterniond newQuat(m_rawPose.qw, m_rawPose.qx, m_rawPose.qy, m_rawPose.qz);
+			//Eigen::Quaterniond oldQuat(m_lastRawPose.qw, m_lastRawPose.qx, m_lastRawPose.qy, m_lastRawPose.qz);
 
-			Eigen::Quaterniond diffQuat = newQuat * oldQuat.inverse();
-			Eigen::AngleAxisd diffAngle(diffQuat);
+			//Eigen::Quaterniond diffQuat = newQuat * oldQuat.inverse();
+			//Eigen::AngleAxisd diffAngle(diffQuat);
 
-			double angle = diffAngle.angle();
-			double angularVelocity = angle / delta_time;
+			//double angle = diffAngle.angle();
+			//double angularVelocity = angle / delta_time;
 
-			Eigen::Vector3d diffAxis = diffAngle.axis();
-			Eigen::Vector3d vecAngularVelocity = diffAxis * angularVelocity;
+			//Eigen::Vector3d diffAxis = diffAngle.axis();
+			//Eigen::Vector3d vecAngularVelocity = diffAxis * angularVelocity;
 
-			pose.vecAngularVelocity[0] = smoothingFactor * vecAngularVelocity.x() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[0];
-			pose.vecAngularVelocity[1] = smoothingFactor * vecAngularVelocity.y() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[1];
-			pose.vecAngularVelocity[2] = smoothingFactor * vecAngularVelocity.z() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[2];
+			//pose.vecAngularVelocity[0] = smoothingFactor * vecAngularVelocity.x() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[0];
+			//pose.vecAngularVelocity[1] = smoothingFactor * vecAngularVelocity.y() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[1];
+			//pose.vecAngularVelocity[2] = smoothingFactor * vecAngularVelocity.z() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[2];
 
-			m_lastAngVeloctiy[0] = pose.vecAngularVelocity[0];
-			m_lastAngVeloctiy[1] = pose.vecAngularVelocity[1];
-			m_lastAngVeloctiy[2] = pose.vecAngularVelocity[2];
-
-			//CompensateVelocity(pose);
+			//m_lastAngVeloctiy[0] = pose.vecAngularVelocity[0];
+			//m_lastAngVeloctiy[1] = pose.vecAngularVelocity[1];
+			//m_lastAngVeloctiy[2] = pose.vecAngularVelocity[2];
 		}
 		else {
 			pose.vecVelocity[0] = 0.0f;
