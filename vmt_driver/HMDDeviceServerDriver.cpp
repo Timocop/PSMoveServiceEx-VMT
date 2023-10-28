@@ -587,7 +587,7 @@ namespace VMTDriver {
 		VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasDisplayComponent_Bool, true);
 		VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasCameraComponent_Bool, false);
 		VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasDriverDirectModeComponent_Bool, false);
-		VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasVirtualDisplayComponent_Bool, true);
+		VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasVirtualDisplayComponent_Bool, false);
 
 		VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceOff_String, "{htc}/icons/headset_status_off.png");
 		VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearching_String, "{htc}/icons/headset_status_searching.gif");
@@ -597,6 +597,12 @@ namespace VMTDriver {
 		VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceNotReady_String, "{htc}/icons/headset_status_error.png");
 		VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceStandby_String, "{htc}/icons/headset_status_standby.png");
 		VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceAlertLow_String, "{htc}/icons/headset_status_error.png");
+
+		if (m_displaySettings.directMode)
+		{
+			VRProperties()->SetInt32Property(m_propertyContainer, Prop_EdidVendorID_Int32, m_displaySettings.vendorId);
+			VRProperties()->SetInt32Property(m_propertyContainer, Prop_EdidProductID_Int32, m_displaySettings.productId);
+		}
 
 		m_alreadyRegistered = true;
 		m_registrationInProgress = false;
@@ -661,6 +667,11 @@ namespace VMTDriver {
 
 	bool HMDDeviceServerDriver::IsDisplayOnDesktop()
 	{
+		if (m_displaySettings.directMode)
+		{
+			return false;
+		}
+
 		return true;
 	}
 

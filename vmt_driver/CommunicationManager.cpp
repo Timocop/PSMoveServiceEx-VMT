@@ -108,6 +108,35 @@ namespace VMTDriver {
 
 		displaySettings.frameRate = frameRate;
 
+		displaySettings.directMode = false;
+		displaySettings.vendorId = 0;
+		displaySettings.productId = 0;
+
+		GetServer()->GetHmdDevice().SetupDisplaySettings(displaySettings);
+	}
+
+	void OSCReceiver::SetupHmdDisplayDirectSettings(
+		int display_x, int display_y, int display_w, int display_h,
+		int render_w, int render_h,
+		int frameRate,
+		int vendorId, int productId)
+	{
+		DisplaySettings displaySettings{};
+
+		displaySettings.display_x = display_x;
+		displaySettings.display_y = display_y;
+		displaySettings.display_w = display_w;
+		displaySettings.display_h = display_h;
+
+		displaySettings.render_w = render_w;
+		displaySettings.render_h = render_h;
+
+		displaySettings.frameRate = frameRate;
+
+		displaySettings.directMode = true;
+		displaySettings.vendorId = vendorId;
+		displaySettings.productId = productId;
+
 		GetServer()->GetHmdDevice().SetupDisplaySettings(displaySettings);
 	}
 
@@ -123,7 +152,7 @@ namespace VMTDriver {
 		renderSettings.distortionBlueOffset = distortionBlueOffset;
 		renderSettings.distortionGreenOffset = distortionGreenOffset;
 		renderSettings.distortionRedOffset = distortionRedOffset;
-
+		
 		// FOV to rad
 		renderSettings.hFov = hFov * (3.14159265358979323846f / 180.f);
 		renderSettings.vFov = vFov * (3.14159265358979323846f / 180.f);
@@ -253,7 +282,11 @@ namespace VMTDriver {
 		float distortionRedOffset{};
 		float hFov{};
 		float vFov{};
+
 		int frameRate{};
+
+		int vendorId{};
+		int productId{};
 
 		float fIpdMeters{};
 		 
@@ -363,6 +396,11 @@ namespace VMTDriver {
 			{
 				args >> display_x >> display_y >> display_w >> display_h >> render_w >> render_h >> frameRate >> osc::EndMessage;
 				SetupHmdDisplaySettings(display_x, display_y, display_w, display_h, render_w, render_h, frameRate);
+			}
+			else if (adr == "/VMT/HMD/SetupDisplayDirect")
+			{
+				args >> display_x >> display_y >> display_w >> display_h >> render_w >> render_h >> frameRate >> vendorId >> productId >> osc::EndMessage;
+				SetupHmdDisplayDirectSettings(display_x, display_y, display_w, display_h, render_w, render_h, frameRate, vendorId, productId);
 			}
 			else if (adr == "/VMT/HMD/SetupRender")
 			{

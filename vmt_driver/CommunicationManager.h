@@ -44,6 +44,7 @@ namespace VMTDriver {
 			ReferMode_t mode = ReferMode_t::None);
 
 		void SetupHmdDisplaySettings(int display_x, int display_y, int display_w, int display_h, int render_w, int render_h, int frameRate);
+		void SetupHmdDisplayDirectSettings(int display_x, int display_y, int display_w, int display_h, int render_w, int render_h, int frameRate, int vendorId, int productId);
 		void SetupHmdRenderSettings(float distortionK0, float distortionK1, float distortionScale, float distortionBlueOffset, float distortionGreenOffset, float distortionRedOffset, float hFov, float vFov);
 
 		virtual void ProcessMessage(const osc::ReceivedMessage& m, const IpEndpointName& remoteEndpoint) override;

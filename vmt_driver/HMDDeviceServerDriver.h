@@ -34,7 +34,12 @@ namespace VMTDriver {
 		int display_h{};
 		int render_w{};
 		int render_h{};
+
 		int frameRate{};
+
+		bool directMode{};
+		int vendorId{};
+		int productId{};
 	};
 
 	struct RenderSettings {
