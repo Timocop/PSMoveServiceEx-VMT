@@ -574,7 +574,7 @@ namespace VMTDriver {
 		VRProperties()->SetFloatProperty(m_propertyContainer, Prop_UserIpdMeters_Float, m_userIpdMeters);
 		VRProperties()->SetFloatProperty(m_propertyContainer, Prop_UserHeadToEyeDepthMeters_Float, 0.0f);
 		VRProperties()->SetFloatProperty(m_propertyContainer, Prop_DisplayFrequency_Float, static_cast<float>(m_displaySettings.frameRate));
-		VRProperties()->SetFloatProperty(m_propertyContainer, Prop_SecondsFromVsyncToPhotons_Float, 0.011f);
+		VRProperties()->SetFloatProperty(m_propertyContainer, Prop_SecondsFromVsyncToPhotons_Float, 1.f / m_displaySettings.frameRate);
 
 		//VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DisplayDebugMode_Bool, true);
 
