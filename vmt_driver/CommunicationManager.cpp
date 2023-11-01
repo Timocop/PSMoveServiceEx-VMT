@@ -59,6 +59,7 @@ namespace VMTDriver {
 		{
 			GetServer()->GetDevice(idx).RegisterToVRSystem((eTrackerType)enable);
 			GetServer()->GetDevice(idx).SetRawPose(pose);
+			GetServer()->GetDevice(idx).UpdatePoseToVRSystem();
 		}
 	}
 
@@ -89,6 +90,7 @@ namespace VMTDriver {
 		//範囲チェック
 		GetServer()->GetHmdDevice().RegisterToVRSystem();
 		GetServer()->GetHmdDevice().SetRawPose(pose);
+		GetServer()->GetHmdDevice().UpdatePoseToVRSystem();
 	}
 
 	void OSCReceiver::SetupHmdDisplaySettings(

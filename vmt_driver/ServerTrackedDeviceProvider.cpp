@@ -180,19 +180,12 @@ namespace VMTDriver {
         //通信の毎フレーム処理をする
         CommunicationManager::GetInstance()->Process();
 
-        //各仮想デバイスの姿勢情報のアップデート
-        size_t size = m_devices.size();
-        for (int i = 0; i < size; i++)
-        {
-            m_devices[i].UpdatePoseToVRSystem();
-        }
-		m_hmd[0].UpdatePoseToVRSystem();
-
         //OpenVRイベントの取得
         VREvent_t VREvent;
         VRServerDriverHost()->PollNextEvent(&VREvent, sizeof(VREvent_t));
 
         //各仮想デバイスのイベントを処理
+		size_t size = m_devices.size();
         for (int i = 0; i < size; i++)
         {
             m_devices[i].ProcessEvent(VREvent);
