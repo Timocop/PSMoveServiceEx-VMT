@@ -494,10 +494,10 @@ namespace VMTDriver {
 			return;
 		}
 
-		if (m_frame > frameCycle) {
+		if (m_displayValid && m_frame > frameCycle) {
 			float frameRate = VRProperties()->GetFloatProperty(m_propertyContainer, Prop_DisplayFrequency_Float);
 
-			OSCReceiver::SendFramerate(frameRate);
+			OSCReceiver::SendHmdInfo(frameRate, m_displaySettings.display_w, m_displaySettings.display_h, m_displaySettings.directMode);
 
 			m_frame = 0;
 		}

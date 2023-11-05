@@ -214,12 +214,15 @@ namespace VMTDriver {
 	}
 
 	//エラー情報を送信する
-	void OSCReceiver::SendFramerate(float framerate) {
+	void OSCReceiver::SendHmdInfo(float framerate, float screenWidth, float screenHeight, bool directMode) {
 		const size_t bufsize = 8192;
 		char buf[bufsize]{};
 		osc::OutboundPacketStream packet(buf, bufsize);
-		packet << osc::BeginMessage("/VMT/Out/Framerate")
+		packet << osc::BeginMessage("/VMT/Out/HmdInfo")
 			<< framerate
+			<< screenWidth
+			<< screenHeight
+			<< directMode
 			<< osc::EndMessage;
 		DirectOSC::OSC::GetInstance()->GetSocketTx()->Send(packet.Data(), packet.Size());
 	}
