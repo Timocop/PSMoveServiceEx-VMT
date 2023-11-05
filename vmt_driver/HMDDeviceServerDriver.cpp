@@ -469,6 +469,8 @@ namespace VMTDriver {
 		pose.poseIsValid = false;
 		pose.result = ETrackingResult::TrackingResult_Calibrating_OutOfRange;
 		SetPose(pose);
+
+		UpdatePoseToVRSystem();
 	}
 
 	//仮想デバイスからOpenVRへデバイスの姿勢の更新を通知する(サーバーから毎フレームコールされる)

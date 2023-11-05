@@ -593,6 +593,8 @@ namespace VMTDriver {
             UpdateTriggerInput(i, 0, 0);
             UpdateJoystickInput(i, 0, 0, 0);
         }
+
+		UpdatePoseToVRSystem();
     }
 
     //仮想デバイスからOpenVRへデバイスの姿勢の更新を通知する(サーバーから毎フレームコールされる)
