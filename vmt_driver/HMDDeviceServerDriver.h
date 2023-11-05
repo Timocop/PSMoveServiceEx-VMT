@@ -97,6 +97,9 @@ namespace VMTDriver {
 		float m_userIpdMeters{};
 
 		bool m_poweron = false;
+
+		const int frameCycle = 120;
+		int m_frame = 0;
 	public:
 		//内部向け
 		HMDDeviceServerDriver();

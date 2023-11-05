@@ -494,15 +494,14 @@ namespace VMTDriver {
 			return;
 		}
 
-		//switch (VREvent.eventType)
-		//{
-		//default:
-		//	//デバッグ用
-		//	//if (m_serial == "VMT_0") {
-		//	//    Log::printf("Event: %d\n",VREvent.eventType);
-		//	//}
-		//	break;
-		//}
+		if (m_frame > frameCycle) {
+			float frameRate = VRProperties()->GetFloatProperty(m_propertyContainer, Prop_DisplayFrequency_Float);
+
+			OSCReceiver::SendFramerate(frameRate);
+
+			m_frame = 0;
+		}
+		m_frame++;
 	}
 
 	/**

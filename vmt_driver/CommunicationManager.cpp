@@ -213,6 +213,17 @@ namespace VMTDriver {
 		DirectOSC::OSC::GetInstance()->GetSocketTx()->Send(packet.Data(), packet.Size());
 	}
 
+	//エラー情報を送信する
+	void OSCReceiver::SendFramerate(float framerate) {
+		const size_t bufsize = 8192;
+		char buf[bufsize]{};
+		osc::OutboundPacketStream packet(buf, bufsize);
+		packet << osc::BeginMessage("/VMT/Out/Framerate")
+			<< framerate
+			<< osc::EndMessage;
+		DirectOSC::OSC::GetInstance()->GetSocketTx()->Send(packet.Data(), packet.Size());
+	}
+
 	//デバイス姿勢とシリアル番号を送信する
 	void OSCReceiver::SendDevicePose(const Eigen::Affine3d& pose, const char* serialNumber)
 	{
