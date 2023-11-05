@@ -43,7 +43,7 @@ namespace VMTDriver {
         void DeviceResetAll();
         bool IsVMTDeviceIndex(int index);
         string GetInstallPath();
-		void RequestRestart();
+		void RequestRestart(const char * restartMessage);
 		std::string GetOpenVRDevicesString();
 
         //OpenVR向け

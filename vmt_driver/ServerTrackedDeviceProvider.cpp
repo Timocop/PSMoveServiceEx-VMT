@@ -66,8 +66,8 @@ namespace VMTDriver {
     }
 
 	//再起動要求
-	void ServerTrackedDeviceProvider::RequestRestart() {
-		VRServerDriverHost()->RequestRestart("*** RESTART REQUIRED ***", "", "", "");
+	void ServerTrackedDeviceProvider::RequestRestart(const char* restartMessage) {
+		VRServerDriverHost()->RequestRestart(restartMessage, "", "", "");
 	}
 
 	//全デバイス情報文字列の取得

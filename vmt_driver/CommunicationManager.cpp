@@ -305,6 +305,8 @@ namespace VMTDriver {
 		float m11{};
 		float m12{};
 
+		const char* restartMessage = nullptr;
+
 		try {
 			string adr = m.AddressPattern();
 			osc::ReceivedMessageArgumentStream args = m.ArgumentStream();
@@ -499,7 +501,8 @@ namespace VMTDriver {
 			//すべてのデバイスのリセット
 			else if (adr == "/VMT/RequestRestart")
 			{
-				GetServer()->RequestRestart();
+				args >> restartMessage >> osc::EndMessage;
+				GetServer()->RequestRestart(restartMessage);
 			}
 
 			//不明なパケット
