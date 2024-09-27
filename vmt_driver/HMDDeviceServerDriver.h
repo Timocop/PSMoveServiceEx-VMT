@@ -142,5 +142,8 @@ namespace VMTDriver {
 		virtual void GetEyeOutputViewport(EVREye eEye, uint32_t* pnX, uint32_t* pnY, uint32_t* pnWidth, uint32_t* pnHeight) override;
 		virtual void GetProjectionRaw(EVREye eEye, float* pfLeft, float* pfRight, float* pfTop, float* pfBottom) override;
 		virtual DistortionCoordinates_t ComputeDistortion(EVREye eEye, float fU, float fV) override;
+
+		int m_lastOutNum{ 0 };
+		int m_lastOutNumFailure{ 0 };
 	};
 }

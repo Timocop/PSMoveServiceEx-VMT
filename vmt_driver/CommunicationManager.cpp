@@ -34,7 +34,9 @@ namespace VMTDriver {
 	//別スレッドからのコール
 
 	//姿勢を各仮想デバイスに設定する
-	void OSCReceiver::SetPose(bool roomToDriver, int idx, int enable,
+	void OSCReceiver::SetPose(bool roomToDriver,
+		int seqNum,
+		int idx, int enable,
 		double x, double y, double z,
 		double qx, double qy, double qz, double qw,
 		double timeoffset,
@@ -59,14 +61,25 @@ namespace VMTDriver {
 		//範囲チェック
 		if (GetServer()->IsVMTDeviceIndex(idx))
 		{
-			GetServer()->GetDevice(idx).RegisterToVRSystem((eTrackerType)enable);
-			GetServer()->GetDevice(idx).SetRawPose(pose);
-			GetServer()->GetDevice(idx).UpdatePoseToVRSystem();
+			auto m_device = GetServer()->GetDevice(idx);
+
+			if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
+				m_device.m_lastOutNumFailure = 0;
+				m_device.m_lastOutNum = seqNum;
+
+				m_device.RegisterToVRSystem((eTrackerType)enable);
+				m_device.SetRawPose(pose);
+				m_device.UpdatePoseToVRSystem();
+			}
+			else if (m_device.m_lastOutNum != seqNum) {
+				m_device.m_lastOutNumFailure++;
+			}
 		}
 	}
 
 	//姿勢を各仮想デバイスに設定する
 	void OSCReceiver::SetHmdPose(bool roomToDriver,
+		int seqNum,
 		double x, double y, double z,
 		double qx, double qy, double qz, double qw,
 		double timeoffset,
@@ -90,9 +103,19 @@ namespace VMTDriver {
 		pose.time = std::chrono::system_clock::now();
 
 		//範囲チェック
-		GetServer()->GetHmdDevice().RegisterToVRSystem();
-		GetServer()->GetHmdDevice().SetRawPose(pose);
-		GetServer()->GetHmdDevice().UpdatePoseToVRSystem();
+		auto m_device = GetServer()->GetHmdDevice();
+		
+		if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
+			m_device.m_lastOutNumFailure = 0;
+			m_device.m_lastOutNum = seqNum;
+
+			GetServer()->GetHmdDevice().RegisterToVRSystem();
+			GetServer()->GetHmdDevice().SetRawPose(pose);
+			GetServer()->GetHmdDevice().UpdatePoseToVRSystem();
+		}
+		else if (m_device.m_lastOutNum != seqNum) {
+			m_device.m_lastOutNumFailure++;
+		}
 	}
 
 	void OSCReceiver::SetupHmdDisplaySettings(
@@ -332,148 +355,84 @@ namespace VMTDriver {
 			if (adr == "/VMT/Room/Unity")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
-					m_lastOutNum = seqNum;
-					m_lastOutNumFailure = 0;
-
-					SetPose(true, idx, enable, x, y, -z, qx, qy, -qz, -qw, timeoffset);
-				}
-				else if (seqNum != m_lastOutNum) {
-					m_lastOutNumFailure++;
-				}
+				SetPose(true, seqNum, idx, enable, x, y, -z, qx, qy, -qz, -qw, timeoffset);
 			}
 			else if (adr == "/VMT/Room/Driver")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
-					m_lastOutNum = seqNum;
-					m_lastOutNumFailure = 0;
-
-					SetPose(true, idx, enable, x, y, z, qx, qy, qz, qw, timeoffset);
-				}
-				else if (seqNum != m_lastOutNum) {
-					m_lastOutNumFailure++;
-				}
+				SetPose(true, seqNum, idx, enable, x, y, z, qx, qy, qz, qw, timeoffset);
 			}
 			else if (adr == "/VMT/Raw/Unity")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
-					m_lastOutNum = seqNum;
-					m_lastOutNumFailure = 0;
-
-					SetPose(false, idx, enable, x, y, -z, qx, qy, -qz, -qw, timeoffset);
-				}
-				else if (seqNum != m_lastOutNum) {
-					m_lastOutNumFailure++;
-				}
+				SetPose(false, seqNum, idx, enable, x, y, -z, qx, qy, -qz, -qw, timeoffset);
 			}
 			else if (adr == "/VMT/Raw/Driver")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
-					m_lastOutNum = seqNum;
-					m_lastOutNumFailure = 0;
-
-					SetPose(false, idx, enable, x, y, z, qx, qy, qz, qw, timeoffset);
-				}
-				else if (seqNum != m_lastOutNum) {
-					m_lastOutNumFailure++;
-				}
+				SetPose(false, seqNum, idx, enable, x, y, z, qx, qy, qz, qw, timeoffset);
 			}
 			else if (adr == "/VMT/Joint/Unity")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
-					m_lastOutNum = seqNum;
-					m_lastOutNumFailure = 0;
-
-					SetPose(false, idx, enable, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Joint);
-				}
-				else if (seqNum != m_lastOutNum) {
-					m_lastOutNumFailure++;
-				}
+				SetPose(false, seqNum, idx, enable, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Joint);
 			}
 			else if (adr == "/VMT/Joint/Driver")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
-					m_lastOutNum = seqNum;
-					m_lastOutNumFailure = 0;
-
-					SetPose(false, idx, enable, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Joint);
-				}
-				else if (seqNum != m_lastOutNum) {
-					m_lastOutNumFailure++;
-				}
+				SetPose(false, seqNum, idx, enable, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Joint);
 			}
 			else if (adr == "/VMT/Follow/Unity")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
-					m_lastOutNum = seqNum;
-					m_lastOutNumFailure = 0;
-
-					SetPose(false, idx, enable, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Follow);
-				}
-				else if (seqNum != m_lastOutNum) {
-					m_lastOutNumFailure++;
-				}
+				SetPose(false, seqNum, idx, enable, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Follow);
 			}
 			else if (adr == "/VMT/Follow/Driver")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
-					m_lastOutNum = seqNum;
-					m_lastOutNumFailure = 0;
-
-					SetPose(false, idx, enable, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Follow);
-				}
-				else if (seqNum != m_lastOutNum) {
-					m_lastOutNumFailure++;
-				}
+				SetPose(false, seqNum, idx, enable, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Follow);
 			}
 			
 			// HMD
 			else if (adr == "/VMT/HMD/Room/Unity")
 			{
-				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				SetHmdPose(true, x, y, -z, qx, qy, -qz, -qw, timeoffset);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
+				SetHmdPose(true, seqNum, x, y, -z, qx, qy, -qz, -qw, timeoffset);
 			}
 			else if (adr == "/VMT/HMD/Room/Driver")
 			{
-				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				SetHmdPose(true, x, y, z, qx, qy, qz, qw, timeoffset);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
+				SetHmdPose(true, seqNum, x, y, z, qx, qy, qz, qw, timeoffset);
 			}
 			else if (adr == "/VMT/HMD/Raw/Unity")
 			{
-				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				SetHmdPose(false, x, y, -z, qx, qy, -qz, -qw, timeoffset);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
+				SetHmdPose(false, seqNum, x, y, -z, qx, qy, -qz, -qw, timeoffset);
 			}
 			else if (adr == "/VMT/HMD/Raw/Driver")
 			{
-				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				SetHmdPose(false, x, y, z, qx, qy, qz, qw, timeoffset);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
+				SetHmdPose(false, seqNum, x, y, z, qx, qy, qz, qw, timeoffset);
 			}
 			else if (adr == "/VMT/HMD/Joint/Unity")
 			{
-				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				SetHmdPose(false, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Joint);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
+				SetHmdPose(false, seqNum, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Joint);
 			}
 			else if (adr == "/VMT/HMD/Joint/Driver")
 			{
-				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				SetHmdPose(false, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Joint);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
+				SetHmdPose(false, seqNum, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Joint);
 			}
 			else if (adr == "/VMT/HMD/Follow/Unity")
 			{
-				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				SetHmdPose(false, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Follow);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
+				SetHmdPose(false, seqNum, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Follow);
 			}
 			else if (adr == "/VMT/HMD/Follow/Driver")
 			{
-				args >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				SetHmdPose(false, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Follow);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
+				SetHmdPose(false, seqNum, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Follow);
 			}
 
 			// HMD Settings
@@ -502,81 +461,91 @@ namespace VMTDriver {
 			else if (adr == "/VMT/Input/Button")
 			{
 				args >> seqNum >> idx >> ButtonIndex >> timeoffset >> ButtonValue >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
-					m_lastOutNum = seqNum;
-					m_lastOutNumFailure = 0;
+				if (GetServer()->IsVMTDeviceIndex(idx))
+				{
+					auto m_device = GetServer()->GetDevice(idx);
 
-					if (GetServer()->IsVMTDeviceIndex(idx))
-					{
-						GetServer()->GetDevice(idx).UpdateButtonInput(ButtonIndex, ButtonValue != 0, timeoffset);
+					if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
+						m_device.m_lastOutNumFailure = 0;
+						m_device.m_lastOutNum = seqNum;
+
+						m_device.UpdateButtonInput(ButtonIndex, ButtonValue != 0, timeoffset);
 					}
-				}
-				else if (seqNum != m_lastOutNum) {
-					m_lastOutNumFailure++;
+					else if (m_device.m_lastOutNum != seqNum) {
+						m_device.m_lastOutNumFailure++;
+					}
 				}
 			}
 			else if (adr == "/VMT/Input/Trigger")
 			{
 				args >> seqNum >> idx >> ButtonIndex >> timeoffset >> TriggerValue >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
-					m_lastOutNum = seqNum;
-					m_lastOutNumFailure = 0;
+				if (GetServer()->IsVMTDeviceIndex(idx))
+				{
+					auto m_device = GetServer()->GetDevice(idx);
 
-					if (GetServer()->IsVMTDeviceIndex(idx))
-					{
-						GetServer()->GetDevice(idx).UpdateTriggerInput(ButtonIndex, TriggerValue, timeoffset);
+					if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
+						m_device.m_lastOutNumFailure = 0;
+						m_device.m_lastOutNum = seqNum;
+
+						m_device.UpdateTriggerInput(ButtonIndex, TriggerValue, timeoffset);
 					}
-				}
-				else if (seqNum != m_lastOutNum) {
-					m_lastOutNumFailure++;
+					else if (m_device.m_lastOutNum != seqNum) {
+						m_device.m_lastOutNumFailure++;
+					}
 				}
 			}
 			else if (adr == "/VMT/Input/Joystick")
 			{
 				args >> seqNum >> idx >> ButtonIndex >> timeoffset >> x >> y >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
-					m_lastOutNum = seqNum;
-					m_lastOutNumFailure = 0;
+				if (GetServer()->IsVMTDeviceIndex(idx))
+				{
+					auto m_device = GetServer()->GetDevice(idx);
 
-					if (GetServer()->IsVMTDeviceIndex(idx))
-					{
-						GetServer()->GetDevice(idx).UpdateJoystickInput(ButtonIndex, x, y, timeoffset);
+					if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
+						m_device.m_lastOutNumFailure = 0;
+						m_device.m_lastOutNum = seqNum;
+
+						m_device.UpdateJoystickInput(ButtonIndex, x, y, timeoffset);
 					}
-				}
-				else if (seqNum != m_lastOutNum) {
-					m_lastOutNumFailure++;
+					else if (m_device.m_lastOutNum != seqNum) {
+						m_device.m_lastOutNumFailure++;
+					}
 				}
 			}
 			else if (adr == "/VMT/Property/Battery")
 			{
 				args >> seqNum >> idx >> batteryValue >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
-					m_lastOutNum = seqNum;
-					m_lastOutNumFailure = 0;
+				if (GetServer()->IsVMTDeviceIndex(idx))
+				{
+					auto m_device = GetServer()->GetDevice(idx);
 
-					if (GetServer()->IsVMTDeviceIndex(idx))
-					{
-						GetServer()->GetDevice(idx).UpdateBatteryProperty(batteryValue);
+					if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
+						m_device.m_lastOutNumFailure = 0;
+						m_device.m_lastOutNum = seqNum;
+
+						m_device.UpdateBatteryProperty(batteryValue);
 					}
-				}
-				else if (seqNum != m_lastOutNum) {
-					m_lastOutNumFailure++;
+					else if (m_device.m_lastOutNum != seqNum) {
+						m_device.m_lastOutNumFailure++;
+					}
 				}
 			}
 			else if (adr == "/VMT/Property/Velocity")
 			{
 				args >> seqNum >> idx >> velocityEnable >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
-					m_lastOutNum = seqNum;
-					m_lastOutNumFailure = 0;
+				if (GetServer()->IsVMTDeviceIndex(idx))
+				{
+					auto m_device = GetServer()->GetDevice(idx);
 
-					if (GetServer()->IsVMTDeviceIndex(idx))
-					{
-						GetServer()->GetDevice(idx).SetVelocity(velocityEnable > 0);
+					if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
+						m_device.m_lastOutNumFailure = 0;
+						m_device.m_lastOutNum = seqNum;
+
+						m_device.SetVelocity(velocityEnable > 0);
 					}
-				}
-				else if (seqNum != m_lastOutNum) {
-					m_lastOutNumFailure++;
+					else if (m_device.m_lastOutNum != seqNum) {
+						m_device.m_lastOutNumFailure++;
+					}
 				}
 			}
 			//すべてのデバイスのリセット

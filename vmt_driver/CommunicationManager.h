@@ -30,13 +30,16 @@ namespace VMTDriver {
 
 	class OSCReceiver : public osc::OscPacketListener {
 	private:
-		void SetPose(bool roomToDriver, int idx, int enable,
+		void SetPose(bool roomToDriver, 
+					int seqNum,
+					int idx, int enable,
 		             double x, double y, double z,
 		             double qx, double qy, double qz, double qw,
 		             double timeoffset,
 		             const char* root_sn = nullptr,
 		             ReferMode_t mode = ReferMode_t::None);
 		void SetHmdPose(bool roomToDriver, 
+			int seqNum,
 			double x, double y, double z, 
 			double qx, double qy, double qz, double qw, 
 			double timeoffset, 
@@ -48,9 +51,6 @@ namespace VMTDriver {
 		void SetupHmdRenderSettings(float distortionK0, float distortionK1, float distortionScale, float distortionBlueOffset, float distortionGreenOffset, float distortionRedOffset, float hFov, float vFov);
 
 		virtual void ProcessMessage(const osc::ReceivedMessage& m, const IpEndpointName& remoteEndpoint) override;
-
-		int m_lastOutNum = 0;
-		int m_lastOutNumFailure = 0;
 	public:
 		static void OSCReceiver::SendLog(int stat, string msg);
 		static void OSCReceiver::SendAlive();
