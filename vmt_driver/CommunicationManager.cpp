@@ -332,7 +332,7 @@ namespace VMTDriver {
 			if (adr == "/VMT/Room/Unity")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || seqNum < m_lastOutNum) {
+				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
 					m_lastOutNum = seqNum;
 					m_lastOutNumFailure = 0;
 
@@ -345,7 +345,7 @@ namespace VMTDriver {
 			else if (adr == "/VMT/Room/Driver")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || seqNum < m_lastOutNum) {
+				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
 					m_lastOutNum = seqNum;
 					m_lastOutNumFailure = 0;
 
@@ -358,7 +358,7 @@ namespace VMTDriver {
 			else if (adr == "/VMT/Raw/Unity")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || seqNum < m_lastOutNum) {
+				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
 					m_lastOutNum = seqNum;
 					m_lastOutNumFailure = 0;
 
@@ -371,7 +371,7 @@ namespace VMTDriver {
 			else if (adr == "/VMT/Raw/Driver")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || seqNum < m_lastOutNum) {
+				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
 					m_lastOutNum = seqNum;
 					m_lastOutNumFailure = 0;
 
@@ -384,7 +384,7 @@ namespace VMTDriver {
 			else if (adr == "/VMT/Joint/Unity")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || seqNum < m_lastOutNum) {
+				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
 					m_lastOutNum = seqNum;
 					m_lastOutNumFailure = 0;
 
@@ -397,7 +397,7 @@ namespace VMTDriver {
 			else if (adr == "/VMT/Joint/Driver")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || seqNum < m_lastOutNum) {
+				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
 					m_lastOutNum = seqNum;
 					m_lastOutNumFailure = 0;
 
@@ -410,7 +410,7 @@ namespace VMTDriver {
 			else if (adr == "/VMT/Follow/Unity")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || seqNum < m_lastOutNum) {
+				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
 					m_lastOutNum = seqNum;
 					m_lastOutNumFailure = 0;
 
@@ -423,7 +423,7 @@ namespace VMTDriver {
 			else if (adr == "/VMT/Follow/Driver")
 			{
 				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || seqNum < m_lastOutNum) {
+				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
 					m_lastOutNum = seqNum;
 					m_lastOutNumFailure = 0;
 
@@ -502,7 +502,7 @@ namespace VMTDriver {
 			else if (adr == "/VMT/Input/Button")
 			{
 				args >> seqNum >> idx >> ButtonIndex >> timeoffset >> ButtonValue >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || seqNum < m_lastOutNum) {
+				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
 					m_lastOutNum = seqNum;
 					m_lastOutNumFailure = 0;
 
@@ -518,7 +518,7 @@ namespace VMTDriver {
 			else if (adr == "/VMT/Input/Trigger")
 			{
 				args >> seqNum >> idx >> ButtonIndex >> timeoffset >> TriggerValue >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || seqNum < m_lastOutNum) {
+				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
 					m_lastOutNum = seqNum;
 					m_lastOutNumFailure = 0;
 
@@ -534,7 +534,7 @@ namespace VMTDriver {
 			else if (adr == "/VMT/Input/Joystick")
 			{
 				args >> seqNum >> idx >> ButtonIndex >> timeoffset >> x >> y >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || seqNum < m_lastOutNum) {
+				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
 					m_lastOutNum = seqNum;
 					m_lastOutNumFailure = 0;
 
@@ -550,7 +550,7 @@ namespace VMTDriver {
 			else if (adr == "/VMT/Property/Battery")
 			{
 				args >> seqNum >> idx >> batteryValue >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || seqNum < m_lastOutNum) {
+				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
 					m_lastOutNum = seqNum;
 					m_lastOutNumFailure = 0;
 
@@ -566,7 +566,7 @@ namespace VMTDriver {
 			else if (adr == "/VMT/Property/Velocity")
 			{
 				args >> seqNum >> idx >> velocityEnable >> osc::EndMessage;
-				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || seqNum < m_lastOutNum) {
+				if (m_lastOutNumFailure > MAX_SEQ_FAILURE || m_lastOutNum < seqNum) {
 					m_lastOutNum = seqNum;
 					m_lastOutNumFailure = 0;
 
