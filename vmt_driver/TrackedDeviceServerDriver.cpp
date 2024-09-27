@@ -108,25 +108,18 @@ namespace VMTDriver {
 			m_lastVecVeloctiy[2] = pose.vecVelocity[2];
 
 			// Angular Velocity
-   //         Eigen::Quaterniond newQuat(m_rawPose.qw, m_rawPose.qx, m_rawPose.qy, m_rawPose.qz);
-   //         Eigen::Quaterniond oldQuat(m_lastRawPose.qw, m_lastRawPose.qx, m_lastRawPose.qy, m_lastRawPose.qz);
+            Eigen::Quaterniond newQuat(m_rawPose.qw, m_rawPose.qx, m_rawPose.qy, m_rawPose.qz);
+            Eigen::Quaterniond oldQuat(m_lastRawPose.qw, m_lastRawPose.qx, m_lastRawPose.qy, m_lastRawPose.qz);
 
-   //         Eigen::Quaterniond diffQuat = newQuat * oldQuat.inverse();
-   //         Eigen::AngleAxisd diffAngle(diffQuat);
+			Eigen::Vector3d vecAngularVelocity = AngularVelocityBetweenQuats(oldQuat, newQuat, delta_time);
 
-   //         double angle = diffAngle.angle();
-   //         double angularVelocity = angle / delta_time;
+			pose.vecAngularVelocity[0] = smoothingFactor * vecAngularVelocity[0] + (1.0 - smoothingFactor) * m_lastAngVeloctiy[0];
+			pose.vecAngularVelocity[1] = smoothingFactor * vecAngularVelocity[1] + (1.0 - smoothingFactor) * m_lastAngVeloctiy[1];
+			pose.vecAngularVelocity[2] = smoothingFactor * vecAngularVelocity[2] + (1.0 - smoothingFactor) * m_lastAngVeloctiy[2];
 
-   //         Eigen::Vector3d diffAxis = diffAngle.axis();
-   //         Eigen::Vector3d vecAngularVelocity = diffAxis * angularVelocity;
-
-			//pose.vecAngularVelocity[0] = smoothingFactor * vecAngularVelocity.x() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[0];
-			//pose.vecAngularVelocity[1] = smoothingFactor * vecAngularVelocity.y() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[1];
-			//pose.vecAngularVelocity[2] = smoothingFactor * vecAngularVelocity.z() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[2];
-
-			//m_lastAngVeloctiy[0] = pose.vecAngularVelocity[0];
-			//m_lastAngVeloctiy[1] = pose.vecAngularVelocity[1];
-			//m_lastAngVeloctiy[2] = pose.vecAngularVelocity[2];
+			m_lastAngVeloctiy[0] = pose.vecAngularVelocity[0];
+			m_lastAngVeloctiy[1] = pose.vecAngularVelocity[1];
+			m_lastAngVeloctiy[2] = pose.vecAngularVelocity[2];
 
 			//CompensateVelocity(pose);
         }
@@ -177,6 +170,18 @@ namespace VMTDriver {
 			pose.qRotation.z = compRotation.z();
 			pose.qRotation.w = compRotation.w();
 		}
+	}
+
+	// Sourced from https://mariogc.com/post/angular-velocity-quaternions/
+	Eigen::Vector3d TrackedDeviceServerDriver::AngularVelocityBetweenQuats(
+		const Eigen::Quaterniond& q1, const Eigen::Quaterniond& q2, double dt
+	) {
+		double r = (2.0f / dt);
+
+		return Eigen::Vector3d(
+			(q1.w() * q2.x() - q1.x() * q2.w() - q1.y() * q2.z() + q1.z() * q2.y()) * r,
+			(q1.w() * q2.y() + q1.x() * q2.z() - q1.y() * q2.w() - q1.z() * q2.x()) * r,
+			(q1.w() * q2.z() - q1.x() * q2.y() + q1.y() * q2.x() - q1.z() * q2.w()) * r);
 	}
 
     //Joint計算を行う
