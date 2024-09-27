@@ -48,6 +48,9 @@ namespace VMTDriver {
 		void SetupHmdRenderSettings(float distortionK0, float distortionK1, float distortionScale, float distortionBlueOffset, float distortionGreenOffset, float distortionRedOffset, float hFov, float vFov);
 
 		virtual void ProcessMessage(const osc::ReceivedMessage& m, const IpEndpointName& remoteEndpoint) override;
+
+		int m_lastOutNum = 0;
+		int m_lastOutNumFailure = 0;
 	public:
 		static void OSCReceiver::SendLog(int stat, string msg);
 		static void OSCReceiver::SendAlive();
