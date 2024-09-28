@@ -61,18 +61,16 @@ namespace VMTDriver {
 		//範囲チェック
 		if (GetServer()->IsVMTDeviceIndex(idx))
 		{
-			auto m_device = GetServer()->GetDevice(idx);
+			if (GetServer()->GetDevice(idx).m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetDevice(idx).m_lastOutNum < seqNum) {
+				GetServer()->GetDevice(idx).m_lastOutNumFailure = 0;
+				GetServer()->GetDevice(idx).m_lastOutNum = seqNum;
 
-			if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
-				m_device.m_lastOutNumFailure = 0;
-				m_device.m_lastOutNum = seqNum;
-
-				m_device.RegisterToVRSystem((eTrackerType)enable);
-				m_device.SetRawPose(pose);
-				m_device.UpdatePoseToVRSystem();
+				GetServer()->GetDevice(idx).RegisterToVRSystem((eTrackerType)enable);
+				GetServer()->GetDevice(idx).SetRawPose(pose);
+				GetServer()->GetDevice(idx).UpdatePoseToVRSystem();
 			}
-			else if (m_device.m_lastOutNum != seqNum) {
-				m_device.m_lastOutNumFailure++;
+			else if (GetServer()->GetDevice(idx).m_lastOutNum != seqNum) {
+				GetServer()->GetDevice(idx).m_lastOutNumFailure++;
 			}
 		}
 	}
@@ -103,18 +101,16 @@ namespace VMTDriver {
 		pose.time = std::chrono::system_clock::now();
 
 		//範囲チェック
-		auto m_device = GetServer()->GetHmdDevice();
-		
-		if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
-			m_device.m_lastOutNumFailure = 0;
-			m_device.m_lastOutNum = seqNum;
+		if (GetServer()->GetHmdDevice().m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetHmdDevice().m_lastOutNum < seqNum) {
+			GetServer()->GetHmdDevice().m_lastOutNumFailure = 0;
+			GetServer()->GetHmdDevice().m_lastOutNum = seqNum;
 
 			GetServer()->GetHmdDevice().RegisterToVRSystem();
 			GetServer()->GetHmdDevice().SetRawPose(pose);
 			GetServer()->GetHmdDevice().UpdatePoseToVRSystem();
 		}
-		else if (m_device.m_lastOutNum != seqNum) {
-			m_device.m_lastOutNumFailure++;
+		else if (GetServer()->GetHmdDevice().m_lastOutNum != seqNum) {
+			GetServer()->GetHmdDevice().m_lastOutNumFailure++;
 		}
 	}
 
@@ -463,16 +459,14 @@ namespace VMTDriver {
 				args >> seqNum >> idx >> ButtonIndex >> timeoffset >> ButtonValue >> osc::EndMessage;
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
-					auto m_device = GetServer()->GetDevice(idx);
+					if (GetServer()->GetDevice(idx).m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetDevice(idx).m_lastOutNum < seqNum) {
+						GetServer()->GetDevice(idx).m_lastOutNumFailure = 0;
+						GetServer()->GetDevice(idx).m_lastOutNum = seqNum;
 
-					if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
-						m_device.m_lastOutNumFailure = 0;
-						m_device.m_lastOutNum = seqNum;
-
-						m_device.UpdateButtonInput(ButtonIndex, ButtonValue != 0, timeoffset);
+						GetServer()->GetDevice(idx).UpdateButtonInput(ButtonIndex, ButtonValue != 0, timeoffset);
 					}
-					else if (m_device.m_lastOutNum != seqNum) {
-						m_device.m_lastOutNumFailure++;
+					else if (GetServer()->GetDevice(idx).m_lastOutNum != seqNum) {
+						GetServer()->GetDevice(idx).m_lastOutNumFailure++;
 					}
 				}
 			}
@@ -481,16 +475,14 @@ namespace VMTDriver {
 				args >> seqNum >> idx >> ButtonIndex >> timeoffset >> TriggerValue >> osc::EndMessage;
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
-					auto m_device = GetServer()->GetDevice(idx);
+					if (GetServer()->GetDevice(idx).m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetDevice(idx).m_lastOutNum < seqNum) {
+						GetServer()->GetDevice(idx).m_lastOutNumFailure = 0;
+						GetServer()->GetDevice(idx).m_lastOutNum = seqNum;
 
-					if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
-						m_device.m_lastOutNumFailure = 0;
-						m_device.m_lastOutNum = seqNum;
-
-						m_device.UpdateTriggerInput(ButtonIndex, TriggerValue, timeoffset);
+						GetServer()->GetDevice(idx).UpdateTriggerInput(ButtonIndex, TriggerValue, timeoffset);
 					}
-					else if (m_device.m_lastOutNum != seqNum) {
-						m_device.m_lastOutNumFailure++;
+					else if (GetServer()->GetDevice(idx).m_lastOutNum != seqNum) {
+						GetServer()->GetDevice(idx).m_lastOutNumFailure++;
 					}
 				}
 			}
@@ -499,16 +491,14 @@ namespace VMTDriver {
 				args >> seqNum >> idx >> ButtonIndex >> timeoffset >> x >> y >> osc::EndMessage;
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
-					auto m_device = GetServer()->GetDevice(idx);
+					if (GetServer()->GetDevice(idx).m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetDevice(idx).m_lastOutNum < seqNum) {
+						GetServer()->GetDevice(idx).m_lastOutNumFailure = 0;
+						GetServer()->GetDevice(idx).m_lastOutNum = seqNum;
 
-					if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
-						m_device.m_lastOutNumFailure = 0;
-						m_device.m_lastOutNum = seqNum;
-
-						m_device.UpdateJoystickInput(ButtonIndex, x, y, timeoffset);
+						GetServer()->GetDevice(idx).UpdateJoystickInput(ButtonIndex, x, y, timeoffset);
 					}
-					else if (m_device.m_lastOutNum != seqNum) {
-						m_device.m_lastOutNumFailure++;
+					else if (GetServer()->GetDevice(idx).m_lastOutNum != seqNum) {
+						GetServer()->GetDevice(idx).m_lastOutNumFailure++;
 					}
 				}
 			}
@@ -517,16 +507,14 @@ namespace VMTDriver {
 				args >> seqNum >> idx >> batteryValue >> osc::EndMessage;
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
-					auto m_device = GetServer()->GetDevice(idx);
+					if (GetServer()->GetDevice(idx).m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetDevice(idx).m_lastOutNum < seqNum) {
+						GetServer()->GetDevice(idx).m_lastOutNumFailure = 0;
+						GetServer()->GetDevice(idx).m_lastOutNum = seqNum;
 
-					if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
-						m_device.m_lastOutNumFailure = 0;
-						m_device.m_lastOutNum = seqNum;
-
-						m_device.UpdateBatteryProperty(batteryValue);
+						GetServer()->GetDevice(idx).UpdateBatteryProperty(batteryValue);
 					}
-					else if (m_device.m_lastOutNum != seqNum) {
-						m_device.m_lastOutNumFailure++;
+					else if (GetServer()->GetDevice(idx).m_lastOutNum != seqNum) {
+						GetServer()->GetDevice(idx).m_lastOutNumFailure++;
 					}
 				}
 			}
@@ -535,16 +523,14 @@ namespace VMTDriver {
 				args >> seqNum >> idx >> velocityEnable >> osc::EndMessage;
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
-					auto m_device = GetServer()->GetDevice(idx);
+					if (GetServer()->GetDevice(idx).m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetDevice(idx).m_lastOutNum < seqNum) {
+						GetServer()->GetDevice(idx).m_lastOutNumFailure = 0;
+						GetServer()->GetDevice(idx).m_lastOutNum = seqNum;
 
-					if (m_device.m_lastOutNumFailure > MAX_SEQ_FAILURE || m_device.m_lastOutNum < seqNum) {
-						m_device.m_lastOutNumFailure = 0;
-						m_device.m_lastOutNum = seqNum;
-
-						m_device.SetVelocity(velocityEnable > 0);
+						GetServer()->GetDevice(idx).SetVelocity(velocityEnable > 0);
 					}
-					else if (m_device.m_lastOutNum != seqNum) {
-						m_device.m_lastOutNumFailure++;
+					else if (GetServer()->GetDevice(idx).m_lastOutNum != seqNum) {
+						GetServer()->GetDevice(idx).m_lastOutNumFailure++;
 					}
 				}
 			}
