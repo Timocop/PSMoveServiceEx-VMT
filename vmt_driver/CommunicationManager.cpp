@@ -53,6 +53,7 @@ namespace VMTDriver {
 		pose.qy = qy;
 		pose.qz = qz;
 		pose.qw = qw;
+
 		pose.timeoffset = timeoffset;
 		pose.mode = mode;
 		pose.root_sn = root_sn ? root_sn : "";
