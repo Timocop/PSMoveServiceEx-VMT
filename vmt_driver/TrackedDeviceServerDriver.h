@@ -112,7 +112,7 @@ namespace VMTDriver {
 		virtual void DebugRequest(const char* pchRequest, char* pchResponseBuffer, uint32_t unResponseBufferSize) override;
 		virtual DriverPose_t GetPose() override; 
 
-		int m_lastOutNum{ 0 };
-		int m_lastOutNumFailure{ 0 };
+		int m_lastSeqNum{ 0 };
+		int m_lastSeqNumFailure{ 0 };
     };
 }

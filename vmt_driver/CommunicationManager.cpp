@@ -68,16 +68,16 @@ namespace VMTDriver {
 		//範囲チェック
 		if (GetServer()->IsVMTDeviceIndex(idx))
 		{
-			if (GetServer()->GetDevice(idx).m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetDevice(idx).m_lastOutNum < seqNum) {
-				GetServer()->GetDevice(idx).m_lastOutNumFailure = 0;
-				GetServer()->GetDevice(idx).m_lastOutNum = seqNum;
+			if (GetServer()->GetDevice(idx).m_lastSeqNumFailure > MAX_SEQ_FAILURE || GetServer()->GetDevice(idx).m_lastSeqNum < seqNum) {
+				GetServer()->GetDevice(idx).m_lastSeqNumFailure = 0;
+				GetServer()->GetDevice(idx).m_lastSeqNum = seqNum;
 
 				GetServer()->GetDevice(idx).RegisterToVRSystem((eTrackerType)enable);
 				GetServer()->GetDevice(idx).SetRawPose(pose);
 				GetServer()->GetDevice(idx).UpdatePoseToVRSystem();
 			}
-			else if (GetServer()->GetDevice(idx).m_lastOutNum != seqNum) {
-				GetServer()->GetDevice(idx).m_lastOutNumFailure++;
+			else if (GetServer()->GetDevice(idx).m_lastSeqNum != seqNum) {
+				GetServer()->GetDevice(idx).m_lastSeqNumFailure++;
 			}
 		}
 	}
@@ -114,16 +114,16 @@ namespace VMTDriver {
 		pose.vaz = 0.0f;
 
 		//範囲チェック
-		if (GetServer()->GetHmdDevice().m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetHmdDevice().m_lastOutNum < seqNum) {
-			GetServer()->GetHmdDevice().m_lastOutNumFailure = 0;
-			GetServer()->GetHmdDevice().m_lastOutNum = seqNum;
+		if (GetServer()->GetHmdDevice().m_lastSeqNumFailure > MAX_SEQ_FAILURE || GetServer()->GetHmdDevice().m_lastSeqNum < seqNum) {
+			GetServer()->GetHmdDevice().m_lastSeqNumFailure = 0;
+			GetServer()->GetHmdDevice().m_lastSeqNum = seqNum;
 
 			GetServer()->GetHmdDevice().RegisterToVRSystem();
 			GetServer()->GetHmdDevice().SetRawPose(pose);
 			GetServer()->GetHmdDevice().UpdatePoseToVRSystem();
 		}
-		else if (GetServer()->GetHmdDevice().m_lastOutNum != seqNum) {
-			GetServer()->GetHmdDevice().m_lastOutNumFailure++;
+		else if (GetServer()->GetHmdDevice().m_lastSeqNum != seqNum) {
+			GetServer()->GetHmdDevice().m_lastSeqNumFailure++;
 		}
 	}
 
@@ -469,82 +469,42 @@ namespace VMTDriver {
 			//デバイス入力系の受信
 			else if (adr == "/VMT/Input/Button")
 			{
-				args >> seqNum >> idx >> ButtonIndex >> timeoffset >> ButtonValue >> osc::EndMessage;
+				args >> idx >> ButtonIndex >> timeoffset >> ButtonValue >> osc::EndMessage;
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
-					if (GetServer()->GetDevice(idx).m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetDevice(idx).m_lastOutNum < seqNum) {
-						GetServer()->GetDevice(idx).m_lastOutNumFailure = 0;
-						GetServer()->GetDevice(idx).m_lastOutNum = seqNum;
-
-						GetServer()->GetDevice(idx).UpdateButtonInput(ButtonIndex, ButtonValue != 0, timeoffset);
-					}
-					else if (GetServer()->GetDevice(idx).m_lastOutNum != seqNum) {
-						GetServer()->GetDevice(idx).m_lastOutNumFailure++;
-					}
+					GetServer()->GetDevice(idx).UpdateButtonInput(ButtonIndex, ButtonValue != 0, timeoffset);
 				}
 			}
 			else if (adr == "/VMT/Input/Trigger")
 			{
-				args >> seqNum >> idx >> ButtonIndex >> timeoffset >> TriggerValue >> osc::EndMessage;
+				args >> idx >> ButtonIndex >> timeoffset >> TriggerValue >> osc::EndMessage;
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
-					if (GetServer()->GetDevice(idx).m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetDevice(idx).m_lastOutNum < seqNum) {
-						GetServer()->GetDevice(idx).m_lastOutNumFailure = 0;
-						GetServer()->GetDevice(idx).m_lastOutNum = seqNum;
-
-						GetServer()->GetDevice(idx).UpdateTriggerInput(ButtonIndex, TriggerValue, timeoffset);
-					}
-					else if (GetServer()->GetDevice(idx).m_lastOutNum != seqNum) {
-						GetServer()->GetDevice(idx).m_lastOutNumFailure++;
-					}
+					GetServer()->GetDevice(idx).UpdateTriggerInput(ButtonIndex, TriggerValue, timeoffset);
 				}
 			}
 			else if (adr == "/VMT/Input/Joystick")
 			{
-				args >> seqNum >> idx >> ButtonIndex >> timeoffset >> x >> y >> osc::EndMessage;
+				args >> idx >> ButtonIndex >> timeoffset >> x >> y >> osc::EndMessage;
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
-					if (GetServer()->GetDevice(idx).m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetDevice(idx).m_lastOutNum < seqNum) {
-						GetServer()->GetDevice(idx).m_lastOutNumFailure = 0;
-						GetServer()->GetDevice(idx).m_lastOutNum = seqNum;
-
-						GetServer()->GetDevice(idx).UpdateJoystickInput(ButtonIndex, x, y, timeoffset);
-					}
-					else if (GetServer()->GetDevice(idx).m_lastOutNum != seqNum) {
-						GetServer()->GetDevice(idx).m_lastOutNumFailure++;
-					}
+					GetServer()->GetDevice(idx).UpdateJoystickInput(ButtonIndex, x, y, timeoffset);
 				}
 			}
 			else if (adr == "/VMT/Property/Battery")
 			{
-				args >> seqNum >> idx >> batteryValue >> osc::EndMessage;
+				args >> idx >> batteryValue >> osc::EndMessage;
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
-					if (GetServer()->GetDevice(idx).m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetDevice(idx).m_lastOutNum < seqNum) {
-						GetServer()->GetDevice(idx).m_lastOutNumFailure = 0;
-						GetServer()->GetDevice(idx).m_lastOutNum = seqNum;
-
-						GetServer()->GetDevice(idx).UpdateBatteryProperty(batteryValue);
-					}
-					else if (GetServer()->GetDevice(idx).m_lastOutNum != seqNum) {
-						GetServer()->GetDevice(idx).m_lastOutNumFailure++;
-					}
+					GetServer()->GetDevice(idx).UpdateBatteryProperty(batteryValue);
 				}
 			}
 			else if (adr == "/VMT/Property/Velocity")
 			{
-				args >> seqNum >> idx >> velocityEnable >> osc::EndMessage;
+				args >> idx >> velocityEnable >> osc::EndMessage;
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
-					if (GetServer()->GetDevice(idx).m_lastOutNumFailure > MAX_SEQ_FAILURE || GetServer()->GetDevice(idx).m_lastOutNum < seqNum) {
-						GetServer()->GetDevice(idx).m_lastOutNumFailure = 0;
-						GetServer()->GetDevice(idx).m_lastOutNum = seqNum;
-
-						GetServer()->GetDevice(idx).SetVelocity(velocityEnable > 0);
-					}
-					else if (GetServer()->GetDevice(idx).m_lastOutNum != seqNum) {
-						GetServer()->GetDevice(idx).m_lastOutNumFailure++;
-					}
+					GetServer()->GetDevice(idx).SetVelocity(velocityEnable > 0);
 				}
 			}
 			//すべてのデバイスのリセット

@@ -151,7 +151,7 @@ namespace VMTDriver {
 		virtual void GetProjectionRaw(EVREye eEye, float* pfLeft, float* pfRight, float* pfTop, float* pfBottom) override;
 		virtual DistortionCoordinates_t ComputeDistortion(EVREye eEye, float fU, float fV) override;
 
-		int m_lastOutNum{ 0 };
-		int m_lastOutNumFailure{ 0 };
+		int m_lastSeqNum{ 0 };
+		int m_lastSeqNumFailure{ 0 };
 	};
 }
