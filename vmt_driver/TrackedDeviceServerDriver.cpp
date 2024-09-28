@@ -68,7 +68,8 @@ namespace VMTDriver {
 		//自動更新が無効ならば内部姿勢を保存し、OpenVR姿勢を更新する
 		m_lastRawPose = m_rawPose; //差分を取るために前回値を取っておく
 		m_rawPose = rawPose;
-		m_rawPose.time = std::chrono::system_clock::now();
+
+		CalcVelocity();
 
 		SetPose(RawPoseToPose());
     }
@@ -79,7 +80,10 @@ namespace VMTDriver {
 	}
 
     //内部姿勢→OpenVR姿勢の変換と、相対座標計算処理を行う
-    void TrackedDeviceServerDriver::CalcVelocity(DriverPose_t& pose) {
+    void TrackedDeviceServerDriver::CalcVelocity() {
+		if (!m_enableVelocity)
+			return;
+
 		// Add some smoothing to velocity. This also adds some minimal prediction effect.
 		double smoothingFactor = Config::GetInstance()->GetVelocitySmoothingFactor();
 
@@ -100,13 +104,9 @@ namespace VMTDriver {
 				(m_rawPose.z - m_lastRawPose.z) / delta_time
 			);
 
-			pose.vecVelocity[0] = smoothingFactor * newVel.x() + (1.0 - smoothingFactor) * m_lastVecVeloctiy[0];
-			pose.vecVelocity[1] = smoothingFactor * newVel.y() + (1.0 - smoothingFactor) * m_lastVecVeloctiy[1];
-			pose.vecVelocity[2] = smoothingFactor * newVel.z() + (1.0 - smoothingFactor) * m_lastVecVeloctiy[2];
-
-			m_lastVecVeloctiy[0] = pose.vecVelocity[0];
-			m_lastVecVeloctiy[1] = pose.vecVelocity[1];
-			m_lastVecVeloctiy[2] = pose.vecVelocity[2];
+			m_rawPose.vpx = smoothingFactor * newVel.x() + (1.0 - smoothingFactor) * m_lastRawPose.vpx;
+			m_rawPose.vpy = smoothingFactor * newVel.y() + (1.0 - smoothingFactor) * m_lastRawPose.vpy;
+			m_rawPose.vpz = smoothingFactor * newVel.z() + (1.0 - smoothingFactor) * m_lastRawPose.vpz;
 
 			// Angular Velocity
 			Eigen::Quaterniond newQuat(m_rawPose.qw, m_rawPose.qx, m_rawPose.qy, m_rawPose.qz);
@@ -114,14 +114,14 @@ namespace VMTDriver {
 
 			Eigen::Vector3d vecAngularVelocity = AngularVelocityBetweenQuats(oldQuat, newQuat, delta_time);
 
-			pose.vecAngularVelocity[0] = smoothingFactor * vecAngularVelocity[0] + (1.0 - smoothingFactor) * m_lastAngVeloctiy[0];
-			pose.vecAngularVelocity[1] = smoothingFactor * vecAngularVelocity[1] + (1.0 - smoothingFactor) * m_lastAngVeloctiy[1];
-			pose.vecAngularVelocity[2] = smoothingFactor * vecAngularVelocity[2] + (1.0 - smoothingFactor) * m_lastAngVeloctiy[2];
-
-			m_lastAngVeloctiy[0] = pose.vecAngularVelocity[0];
-			m_lastAngVeloctiy[1] = pose.vecAngularVelocity[1];
-			m_lastAngVeloctiy[2] = pose.vecAngularVelocity[2];
+			m_rawPose.vax = smoothingFactor * vecAngularVelocity.x() + (1.0 - smoothingFactor) * m_lastRawPose.vax;
+			m_rawPose.vay = smoothingFactor * vecAngularVelocity.y() + (1.0 - smoothingFactor) * m_lastRawPose.vay;
+			m_rawPose.vaz = smoothingFactor * vecAngularVelocity.z() + (1.0 - smoothingFactor) * m_lastRawPose.vaz;
 		}
+
+		// Apply some delay to compensate for velocity.
+		// $OTDO Sample the frequency from incomming packets instead.
+		m_rawPose.timeoffset += (1.0 / 60.0);
     }
 
 	// Sourced from https://mariogc.com/post/angular-velocity-quaternions/
@@ -314,9 +314,9 @@ namespace VMTDriver {
         pose.vecPosition[1] = m_rawPose.y;
         pose.vecPosition[2] = m_rawPose.z;
 
-        pose.vecVelocity[0] = 0.0f;
-        pose.vecVelocity[1] = 0.0f;
-        pose.vecVelocity[2] = 0.0f;
+        pose.vecVelocity[0] = m_rawPose.vpx;
+        pose.vecVelocity[1] = m_rawPose.vpy;
+        pose.vecVelocity[2] = m_rawPose.vpz;
 
         pose.vecAcceleration[0] = 0.0f;
         pose.vecAcceleration[1] = 0.0f;
@@ -327,9 +327,9 @@ namespace VMTDriver {
         pose.qRotation.z = m_rawPose.qz;
         pose.qRotation.w = m_rawPose.qw;
 
-        pose.vecAngularVelocity[0] = 0.0f;
-        pose.vecAngularVelocity[1] = 0.0f;
-        pose.vecAngularVelocity[2] = 0.0f;
+        pose.vecAngularVelocity[0] = m_rawPose.vax;
+        pose.vecAngularVelocity[1] = m_rawPose.vay;
+        pose.vecAngularVelocity[2] = m_rawPose.vaz;
 
         pose.vecAngularAcceleration[0] = 0.0f;
         pose.vecAngularAcceleration[1] = 0.0f;
@@ -358,12 +358,6 @@ namespace VMTDriver {
             RejectTracking(pose);
             return pose;
         }
-
-		//速度エミュレーションが有効な場合、速度・各速度の計算を行い、更新する
-		if (m_enableVelocity)
-		{
-			CalcVelocity(pose);
-		}
 
         //トラッキングモードに合わせて処理する
         switch (m_rawPose.mode) {

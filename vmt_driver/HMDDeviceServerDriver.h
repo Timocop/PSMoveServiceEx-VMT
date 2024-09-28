@@ -68,6 +68,13 @@ namespace VMTDriver {
 		ReferMode_t mode{};
 		std::string root_sn{};
 		std::chrono::system_clock::time_point time{};
+
+		double vpx{};
+		double vpy{};
+		double vpz{};
+		double vax{};
+		double vay{};
+		double vaz{};
 	};
 
 	//個々のデバイス
@@ -113,12 +120,12 @@ namespace VMTDriver {
 		void SetupRenderSettings(RenderSettings displaySettings);
 		void SetIpdMeters(float userIpdMeters);
 		void SetVelocity(bool enable);
+		void CalcVelocity();
 		DriverPose_t RawPoseToPose();
 		void RegisterToVRSystem();
 		void UpdatePoseToVRSystem();
 		void Reset();
 
-		void CalcVelocity(DriverPose_t& pose);
 		Eigen::Vector3d AngularVelocityBetweenQuats(const Eigen::Quaterniond & q1, const Eigen::Quaterniond & q2, double dt);
 		void CalcJoint(DriverPose_t& pose, string serial, ReferMode_t mode, Eigen::Affine3d& RoomToDriverAffin);
 		static int SearchDevice(vr::TrackedDevicePose_t* poses, string serial);
