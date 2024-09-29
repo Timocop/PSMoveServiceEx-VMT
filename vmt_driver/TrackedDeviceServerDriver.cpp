@@ -69,71 +69,12 @@ namespace VMTDriver {
 		m_lastRawPose = m_rawPose; //差分を取るために前回値を取っておく
 		m_rawPose = rawPose;
 
-		CalcVelocity();
-
 		SetPose(RawPoseToPose());
     }
 
 	void TrackedDeviceServerDriver::SetVelocity(bool enable)
 	{
 		m_enableVelocity = enable;
-	}
-
-    //内部姿勢→OpenVR姿勢の変換と、相対座標計算処理を行う
-    void TrackedDeviceServerDriver::CalcVelocity() {
-		if (!m_enableVelocity)
-			return;
-
-		// Add some smoothing to velocity. This also adds some minimal prediction effect.
-		double smoothingFactor = Config::GetInstance()->GetVelocitySmoothingFactor();
-
-		if (smoothingFactor <= 0.00)
-			return;
-
-		if (smoothingFactor > 1.0)
-			smoothingFactor = 1.0;
-
-		double delta_time = std::chrono::duration_cast<std::chrono::microseconds>(m_rawPose.time - m_lastRawPose.time).count() / (1000.0 * 1000.0);
-
-		if (delta_time > std::numeric_limits<double>::epsilon())
-		{
-			// Linear Velocity
-			Eigen::Vector3d newVel(
-				(m_rawPose.x - m_lastRawPose.x) / delta_time,
-				(m_rawPose.y - m_lastRawPose.y) / delta_time,
-				(m_rawPose.z - m_lastRawPose.z) / delta_time
-			);
-
-			m_rawPose.vpx = smoothingFactor * newVel.x() + (1.0 - smoothingFactor) * m_lastRawPose.vpx;
-			m_rawPose.vpy = smoothingFactor * newVel.y() + (1.0 - smoothingFactor) * m_lastRawPose.vpy;
-			m_rawPose.vpz = smoothingFactor * newVel.z() + (1.0 - smoothingFactor) * m_lastRawPose.vpz;
-
-			// Angular Velocity
-			Eigen::Quaterniond newQuat(m_rawPose.qw, m_rawPose.qx, m_rawPose.qy, m_rawPose.qz);
-			Eigen::Quaterniond oldQuat(m_lastRawPose.qw, m_lastRawPose.qx, m_lastRawPose.qy, m_lastRawPose.qz);
-
-			Eigen::Vector3d vecAngularVelocity = AngularVelocityBetweenQuats(oldQuat, newQuat, delta_time);
-
-			m_rawPose.vax = smoothingFactor * vecAngularVelocity.x() + (1.0 - smoothingFactor) * m_lastRawPose.vax;
-			m_rawPose.vay = smoothingFactor * vecAngularVelocity.y() + (1.0 - smoothingFactor) * m_lastRawPose.vay;
-			m_rawPose.vaz = smoothingFactor * vecAngularVelocity.z() + (1.0 - smoothingFactor) * m_lastRawPose.vaz;
-		}
-
-		// Apply some delay to compensate for velocity.
-		// $OTDO Sample the frequency from incomming packets instead.
-		m_rawPose.timeoffset += (1.0 / 60.0);
-    }
-
-	// Sourced from https://mariogc.com/post/angular-velocity-quaternions/
-	Eigen::Vector3d TrackedDeviceServerDriver::AngularVelocityBetweenQuats(
-		const Eigen::Quaterniond& q1, const Eigen::Quaterniond& q2, double dt
-	) {
-		double r = (2.0f / dt);
-
-		return Eigen::Vector3d(
-			(q1.w() * q2.x() - q1.x() * q2.w() - q1.y() * q2.z() + q1.z() * q2.y()) * r,
-			(q1.w() * q2.y() + q1.x() * q2.z() - q1.y() * q2.w() - q1.z() * q2.x()) * r,
-			(q1.w() * q2.z() - q1.x() * q2.y() + q1.y() * q2.x() - q1.z() * q2.w()) * r);
 	}
 
     //Joint計算を行う
@@ -314,9 +255,9 @@ namespace VMTDriver {
         pose.vecPosition[1] = m_rawPose.y;
         pose.vecPosition[2] = m_rawPose.z;
 
-        pose.vecVelocity[0] = m_rawPose.vpx;
-        pose.vecVelocity[1] = m_rawPose.vpy;
-        pose.vecVelocity[2] = m_rawPose.vpz;
+        pose.vecVelocity[0] = 0.0f;
+        pose.vecVelocity[1] = 0.0f;
+        pose.vecVelocity[2] = 0.0f;
 
         pose.vecAcceleration[0] = 0.0f;
         pose.vecAcceleration[1] = 0.0f;
@@ -327,9 +268,9 @@ namespace VMTDriver {
         pose.qRotation.z = m_rawPose.qz;
         pose.qRotation.w = m_rawPose.qw;
 
-        pose.vecAngularVelocity[0] = m_rawPose.vax;
-        pose.vecAngularVelocity[1] = m_rawPose.vay;
-        pose.vecAngularVelocity[2] = m_rawPose.vaz;
+        pose.vecAngularVelocity[0] = 0.0f;
+        pose.vecAngularVelocity[1] = 0.0f;
+        pose.vecAngularVelocity[2] = 0.0f;
 
         pose.vecAngularAcceleration[0] = 0.0f;
         pose.vecAngularAcceleration[1] = 0.0f;
@@ -358,6 +299,12 @@ namespace VMTDriver {
             RejectTracking(pose);
             return pose;
         }
+
+		//速度エミュレーションが有効な場合、速度・各速度の計算を行い、更新する
+		if (m_enableVelocity)
+		{
+			CalcVelocity(pose);
+		}
 
         //トラッキングモードに合わせて処理する
         switch (m_rawPose.mode) {
@@ -388,6 +335,155 @@ namespace VMTDriver {
         }
         return pose;
     }
+
+	void TrackedDeviceServerDriver::CalcVelocity(DriverPose_t& pose) {
+		double smoothingFactor = Config::GetInstance()->GetVelocitySmoothingFactor();
+		if (smoothingFactor > 1.0)
+			smoothingFactor = 1.0;
+		if (smoothingFactor < 0.01)
+			smoothingFactor = 0.01;
+
+		if (smoothingFactor >= 1.0)
+			return;
+
+		if (m_rawPose.x != m_lastRawPose.x
+			|| m_rawPose.y != m_lastRawPose.y
+			|| m_rawPose.z != m_lastRawPose.z) {
+			double delta_time = std::chrono::duration_cast<std::chrono::microseconds>(m_rawPose.time - m_lastVecTime).count() / (1000.0 * 1000.0);
+			if (m_lastVecValid && delta_time > std::numeric_limits<double>::epsilon()) {
+				// Linear Velocity
+				Eigen::Vector3d newVel(
+					(m_rawPose.x - m_lastRawPose.x) / delta_time,
+					(m_rawPose.y - m_lastRawPose.y) / delta_time,
+					(m_rawPose.z - m_lastRawPose.z) / delta_time
+				);
+
+				Eigen::Vector3d posVelocity(
+					smoothingFactor * newVel.x() + (1.0 - smoothingFactor) * m_lastVecVeloctiy[0],
+					smoothingFactor * newVel.y() + (1.0 - smoothingFactor) * m_lastVecVeloctiy[1],
+					smoothingFactor * newVel.z() + (1.0 - smoothingFactor) * m_lastVecVeloctiy[2]
+				);
+
+				pose.vecVelocity[0] = posVelocity[0];
+				pose.vecVelocity[1] = posVelocity[1];
+				pose.vecVelocity[2] = posVelocity[2];
+				m_lastVecVeloctiy[0] = posVelocity[0];
+				m_lastVecVeloctiy[1] = posVelocity[1];
+				m_lastVecVeloctiy[2] = posVelocity[2];
+
+				// Compensate Linear Velocity
+				Eigen::Vector3d compPosition(
+					pose.vecPosition[0] - (pose.vecVelocity[0] * delta_time),
+					pose.vecPosition[1] - (pose.vecVelocity[1] * delta_time),
+					pose.vecPosition[2] - (pose.vecVelocity[2] * delta_time)
+				);
+
+				pose.vecPosition[0] = compPosition[0];
+				pose.vecPosition[1] = compPosition[1];
+				pose.vecPosition[2] = compPosition[2];
+				m_lastVec[0] = compPosition[0];
+				m_lastVec[1] = compPosition[1];
+				m_lastVec[2] = compPosition[2];
+			}
+
+			m_lastVecTime = m_rawPose.time;
+			m_lastVecValid = true;
+		}
+		else
+		{
+			pose.vecVelocity[0] = m_lastVecVeloctiy[0];
+			pose.vecVelocity[1] = m_lastVecVeloctiy[1];
+			pose.vecVelocity[2] = m_lastVecVeloctiy[2];
+			pose.vecPosition[0] = m_lastVec[0];
+			pose.vecPosition[1] = m_lastVec[1];
+			pose.vecPosition[2] = m_lastVec[2];
+		}
+
+
+		if (m_rawPose.qx != m_lastRawPose.qx
+				|| m_rawPose.qy != m_lastRawPose.qy
+				|| m_rawPose.qz != m_lastRawPose.qz
+				|| m_rawPose.qw != m_lastRawPose.qw) {
+			double delta_time = std::chrono::duration_cast<std::chrono::microseconds>(m_rawPose.time - m_lastAngTime).count() / (1000.0 * 1000.0);
+			if (m_lastAngValid && delta_time > std::numeric_limits<double>::epsilon()) {
+				// Angular Velocity
+				Eigen::Quaterniond newQuat(m_rawPose.qw, m_rawPose.qx, m_rawPose.qy, m_rawPose.qz);
+				Eigen::Quaterniond oldQuat(m_lastRawPose.qw, m_lastRawPose.qx, m_lastRawPose.qy, m_lastRawPose.qz);
+
+				Eigen::Vector3d vecAngularVelocity = AngularVelocityBetweenQuats(oldQuat, newQuat, delta_time);
+
+				Eigen::Vector3d angVelocity(
+					smoothingFactor * vecAngularVelocity.x() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[0],
+					smoothingFactor * vecAngularVelocity.y() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[1],
+					smoothingFactor * vecAngularVelocity.z() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[2]
+				);
+
+				pose.vecAngularVelocity[0] = angVelocity[0];
+				pose.vecAngularVelocity[1] = angVelocity[1];
+				pose.vecAngularVelocity[2] = angVelocity[2];
+				m_lastAngVeloctiy[0] = angVelocity[0];
+				m_lastAngVeloctiy[1] = angVelocity[1];
+				m_lastAngVeloctiy[2] = angVelocity[2];
+
+				// Compensate Angular Velocity
+				Eigen::Quaterniond angularCorrection = QuaternionFromAngularVelocity(
+					Eigen::Vector3d(pose.vecAngularVelocity[0], pose.vecAngularVelocity[1], pose.vecAngularVelocity[2]), delta_time
+				);
+				Eigen::Quaterniond compRotation = newQuat * angularCorrection.conjugate();
+
+				pose.qRotation.x = compRotation.x();
+				pose.qRotation.y = compRotation.y();
+				pose.qRotation.z = compRotation.z();
+				pose.qRotation.w = compRotation.w();
+				m_lastAng[0] = compRotation.x();
+				m_lastAng[1] = compRotation.y();
+				m_lastAng[2] = compRotation.z();
+				m_lastAng[3] = compRotation.w();
+			}
+
+			m_lastAngTime = m_rawPose.time;
+			m_lastAngValid = true;
+		}
+		else
+		{
+			pose.vecAngularVelocity[0] = m_lastAngVeloctiy[0];
+			pose.vecAngularVelocity[1] = m_lastAngVeloctiy[1];
+			pose.vecAngularVelocity[2] = m_lastAngVeloctiy[2];
+			pose.qRotation.x = m_lastAng[0];
+			pose.qRotation.y = m_lastAng[1];
+			pose.qRotation.z = m_lastAng[2];
+			pose.qRotation.w = m_lastAng[3];
+		}
+
+	}
+
+	Eigen::Quaterniond TrackedDeviceServerDriver::QuaternionFromAngularVelocity(
+		const Eigen::Vector3d& angularVelocity, double deltaTime
+	) {
+		// Only convert to quaternion if angular velocity is significant
+		if (angularVelocity.norm() < std::numeric_limits<double>::epsilon()) {
+			return Eigen::Quaterniond::Identity(); // No rotation
+		}
+
+		// Create the quaternion for angular velocity
+		double halfTheta = angularVelocity.norm() * deltaTime * 0.5;
+		Eigen::Vector3d axis = angularVelocity.normalized();
+		double sinHalfAngle = sin(halfTheta);
+
+		return Eigen::Quaterniond(cos(halfTheta), axis.x() * sinHalfAngle, axis.y() * sinHalfAngle, axis.z() * sinHalfAngle);
+	}
+
+	// Sourced from https://mariogc.com/post/angular-velocity-quaternions/
+	Eigen::Vector3d TrackedDeviceServerDriver::AngularVelocityBetweenQuats(
+		const Eigen::Quaterniond& q1, const Eigen::Quaterniond& q2, double dt
+	) {
+		double r = (2.0f / dt);
+
+		return Eigen::Vector3d(
+			(q1.w() * q2.x() - q1.x() * q2.w() - q1.y() * q2.z() + q1.z() * q2.y()) * r,
+			(q1.w() * q2.y() + q1.x() * q2.z() - q1.y() * q2.w() - q1.z() * q2.x()) * r,
+			(q1.w() * q2.z() - q1.x() * q2.y() + q1.y() * q2.x() - q1.z() * q2.w()) * r);
+	}
 
     //仮想デバイスからOpenVRへデバイスの登録を依頼する
     void TrackedDeviceServerDriver::RegisterToVRSystem(eTrackerType type)

@@ -68,13 +68,6 @@ namespace VMTDriver {
 		ReferMode_t mode{};
 		std::string root_sn{};
 		std::chrono::system_clock::time_point time{};
-
-		double vpx{};
-		double vpy{};
-		double vpz{};
-		double vax{};
-		double vay{};
-		double vaz{};
 	};
 
 	//個々のデバイス
@@ -94,13 +87,11 @@ namespace VMTDriver {
 		RawHmdPose m_lastRawPose{ 0 };
 		double m_lastVecVeloctiy[3]{ 0 };
 		double m_lastAngVeloctiy[3]{ 0 };
-		double m_lastPosition[3]{ 0 };
-		double m_lastRotation[4]{ 0 };
+
 		DisplaySettings m_displaySettings{ 0 };
 		RenderSettings m_renderSettings{ 0 };
 		bool m_displayValid = false;
 		bool m_renderValid = false;
-
 		float m_userIpdMeters{};
 
 		bool m_poweron = false;
@@ -120,8 +111,10 @@ namespace VMTDriver {
 		void SetupRenderSettings(RenderSettings displaySettings);
 		void SetIpdMeters(float userIpdMeters);
 		void SetVelocity(bool enable);
-		void CalcVelocity();
 		DriverPose_t RawPoseToPose();
+		void CalcVelocity(DriverPose_t & pose);
+		void CompensateVelocity(DriverPose_t & pose);
+		Eigen::Quaterniond QuaternionFromAngularVelocity(const Eigen::Vector3d & angularVelocity, double deltaTime);
 		void RegisterToVRSystem();
 		void UpdatePoseToVRSystem();
 		void Reset();

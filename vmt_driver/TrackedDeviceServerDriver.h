@@ -44,13 +44,6 @@ namespace VMTDriver {
         ReferMode_t mode{};
         std::string root_sn{};
 		std::chrono::system_clock::time_point time{};
-
-		double vpx{};
-		double vpy{};
-		double vpz{};
-		double vax{};
-		double vay{};
-		double vaz{};
     };
 
     //個々のデバイス
@@ -69,6 +62,14 @@ namespace VMTDriver {
 		DriverPose_t m_pose{ 0 };
 		RawPose m_rawPose{ 0 };
 		RawPose m_lastRawPose{ 0 };
+		double m_lastVec[3]{ 0 };
+		double m_lastAng[4]{ 0 };
+		double m_lastVecVeloctiy[3]{ 0 };
+		double m_lastAngVeloctiy[3]{ 0 };
+		std::chrono::system_clock::time_point m_lastVecTime{};
+		std::chrono::system_clock::time_point m_lastAngTime{};
+		bool m_lastVecValid = false;
+		bool m_lastAngValid = false;
 
 		VRInputComponentHandle_t ButtonComponent[8]{ 0 };
 		VRInputComponentHandle_t TriggerComponent[2]{ 0 };
@@ -87,6 +88,7 @@ namespace VMTDriver {
 		void SetRawPose(RawPose rawPose);
 		void SetVelocity(bool enable);
 		DriverPose_t RawPoseToPose();
+		void CalcVelocity(DriverPose_t & pose);
 		void RegisterToVRSystem(eTrackerType type);
 		void UpdatePoseToVRSystem();
 		void UpdateButtonInput(uint32_t index, bool value, double timeoffset);
@@ -95,7 +97,7 @@ namespace VMTDriver {
 		void UpdateBatteryProperty(float value);
 		void Reset();
 
-		void CalcVelocity();
+		Eigen::Quaterniond QuaternionFromAngularVelocity(const Eigen::Vector3d & angularVelocity, double deltaTime);
 		Eigen::Vector3d AngularVelocityBetweenQuats(const Eigen::Quaterniond & q1, const Eigen::Quaterniond & q2, double dt);
         void CalcJoint(DriverPose_t& pose, string serial, ReferMode_t mode, Eigen::Affine3d& RoomToDriverAffin);
         static int SearchDevice(vr::TrackedDevicePose_t* poses, string serial);

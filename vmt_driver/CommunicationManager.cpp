@@ -58,12 +58,6 @@ namespace VMTDriver {
 		pose.mode = mode;
 		pose.root_sn = root_sn ? root_sn : "";
 		pose.time = std::chrono::system_clock::now();
-		pose.vpx = 0.0f;
-		pose.vpy = 0.0f;
-		pose.vpz = 0.0f;
-		pose.vax = 0.0f;
-		pose.vay = 0.0f;
-		pose.vaz = 0.0f;
 
 		//範囲チェック
 		if (GetServer()->IsVMTDeviceIndex(idx))
@@ -106,12 +100,6 @@ namespace VMTDriver {
 		pose.mode = mode;
 		pose.root_sn = root_sn ? root_sn : "";
 		pose.time = std::chrono::system_clock::now();
-		pose.vpx = 0.0f;
-		pose.vpy = 0.0f;
-		pose.vpz = 0.0f;
-		pose.vax = 0.0f;
-		pose.vay = 0.0f;
-		pose.vaz = 0.0f;
 
 		//範囲チェック
 		if (GetServer()->GetHmdDevice().m_lastSeqNumFailure > MAX_SEQ_FAILURE || GetServer()->GetHmdDevice().m_lastSeqNum < seqNum) {
