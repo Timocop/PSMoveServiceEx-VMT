@@ -53,7 +53,6 @@ namespace VMTDriver {
 		std::string m_LeftControllerIconPrefix = "vmt";
 		std::string m_RightControllerIconPrefix = "vmt";
 		std::string m_TrackingReferenceIconPrefix = "vmt";
-		double m_VelocitySmoothingFactor = 0.1;
 
 		json LoadJson();
 		void SaveJson(json j);

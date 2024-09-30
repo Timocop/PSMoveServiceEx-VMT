@@ -104,10 +104,6 @@ namespace VMTDriver {
 		{
 			j["RoomMatrix"] = {};
 		}
-		if (!j.contains("VelocitySmoothingFactor"))
-		{
-			j["VelocitySmoothingFactor"] = 0.1;
-		}
 		if (!j.contains("ReceivePort"))
 		{
 			j["ReceivePort"] = -1;
@@ -198,10 +194,6 @@ namespace VMTDriver {
 					, j["RoomMatrix"][8], j["RoomMatrix"][9], j["RoomMatrix"][10], j["RoomMatrix"][11]
 					, 0, 0, 0, 1;
 				SetRoomMatrixStatus(true); //ルーム行列がセットされた
-			}
-			if (j.contains("VelocitySmoothingFactor"))
-			{
-				m_VelocitySmoothingFactor = j["VelocitySmoothingFactor"];
 			}
 			if (j.contains("ReceivePort"))
 			{
@@ -303,12 +295,6 @@ namespace VMTDriver {
 	Eigen::Matrix4d& Config::GetRoomToDriverMatrix()
 	{
 		return m_RoomToDriverMatrix;
-	}
-
-	//速度有効化の取得
-	double Config::GetVelocitySmoothingFactor()
-	{
-		return m_VelocitySmoothingFactor;
 	}
 
 	//受信ポートの取得

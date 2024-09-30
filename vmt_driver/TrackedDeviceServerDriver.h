@@ -33,6 +33,7 @@ namespace VMTDriver {
         bool roomToDriver{};
         int idx{};
         int enable{};
+
         double x{};
         double y{};
         double z{};
@@ -40,6 +41,14 @@ namespace VMTDriver {
         double qy{};
         double qz{};
         double qw{};
+
+		double vpx{};
+		double vpy{};
+		double vpz{};
+		double vax{};
+		double vay{};
+		double vaz{};
+
         double timeoffset{};
         ReferMode_t mode{};
         std::string root_sn{};
@@ -57,7 +66,6 @@ namespace VMTDriver {
 		TrackedDeviceIndex_t m_deviceIndex{ 0 };
 		PropertyContainerHandle_t m_propertyContainer{ 0 };
 		uint32_t m_index = k_unTrackedDeviceIndexInvalid;
-		bool m_enableVelocity = false;
 
 		DriverPose_t m_pose{ 0 };
 		RawPose m_rawPose{ 0 };
@@ -86,9 +94,7 @@ namespace VMTDriver {
 		void SetObjectIndex(uint32_t);
 		void SetPose(DriverPose_t pose);
 		void SetRawPose(RawPose rawPose);
-		void SetVelocity(bool enable);
 		DriverPose_t RawPoseToPose();
-		void CalcVelocity(DriverPose_t & pose);
 		void RegisterToVRSystem(eTrackerType type);
 		void UpdatePoseToVRSystem();
 		void UpdateButtonInput(uint32_t index, bool value, double timeoffset);

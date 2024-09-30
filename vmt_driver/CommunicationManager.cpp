@@ -39,6 +39,8 @@ namespace VMTDriver {
 		int idx, int enable,
 		double x, double y, double z,
 		double qx, double qy, double qz, double qw,
+		double vpx, double vpy, double vpz,
+		double vax, double vay, double vaz,
 		double timeoffset,
 		const char* root_sn, ReferMode_t mode)
 	{
@@ -53,6 +55,13 @@ namespace VMTDriver {
 		pose.qy = qy;
 		pose.qz = qz;
 		pose.qw = qw;
+
+		pose.vpx = vpx;
+		pose.vpy = vpy;
+		pose.vpz = vpz;
+		pose.vax = vax;
+		pose.vay = vay;
+		pose.vaz = vaz;
 
 		pose.timeoffset = timeoffset;
 		pose.mode = mode;
@@ -81,6 +90,8 @@ namespace VMTDriver {
 		int seqNum,
 		double x, double y, double z,
 		double qx, double qy, double qz, double qw,
+		double vpx, double vpy, double vpz,
+		double vax, double vay, double vaz,
 		double timeoffset,
 		const char* root_sn, ReferMode_t mode)
 	{
@@ -95,6 +106,13 @@ namespace VMTDriver {
 		pose.qy = qy;
 		pose.qz = qz;
 		pose.qw = qw;
+
+		pose.vpx = vpx;
+		pose.vpy = vpy;
+		pose.vpz = vpz;
+		pose.vax = vax;
+		pose.vay = vay;
+		pose.vaz = vaz;
 
 		pose.timeoffset = timeoffset;
 		pose.mode = mode;
@@ -298,6 +316,12 @@ namespace VMTDriver {
 		float qy{};
 		float qz{};
 		float qw{};
+		float vpx{};
+		float vpy{};
+		float vpz{};
+		float vax{};
+		float vay{};
+		float vaz{};
 		int ButtonIndex{};
 		int ButtonValue{};
 		float TriggerValue{};
@@ -351,85 +375,85 @@ namespace VMTDriver {
 			//姿勢情報の受信
 			if (adr == "/VMT/Room/Unity")
 			{
-				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				SetPose(true, seqNum, idx, enable, x, y, -z, qx, qy, -qz, -qw, timeoffset);
+				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> osc::EndMessage;
+				SetPose(true, seqNum, idx, enable, x, y, -z, qx, qy, -qz, -qw, vpx, vpy, -vpz, vax, vay, vaz, timeoffset);
 			}
 			else if (adr == "/VMT/Room/Driver")
 			{
-				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				SetPose(true, seqNum, idx, enable, x, y, z, qx, qy, qz, qw, timeoffset);
+				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> osc::EndMessage;
+				SetPose(true, seqNum, idx, enable, x, y, z, qx, qy, qz, qw, vpx, vpy, vpz, vax, vay, vaz, timeoffset);
 			}
 			else if (adr == "/VMT/Raw/Unity")
 			{
-				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				SetPose(false, seqNum, idx, enable, x, y, -z, qx, qy, -qz, -qw, timeoffset);
+				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> osc::EndMessage;
+				SetPose(false, seqNum, idx, enable, x, y, -z, qx, qy, -qz, -qw, vpx, vpy, -vpz, vax, vay, vaz, timeoffset);
 			}
 			else if (adr == "/VMT/Raw/Driver")
 			{
-				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				SetPose(false, seqNum, idx, enable, x, y, z, qx, qy, qz, qw, timeoffset);
+				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> osc::EndMessage;
+				SetPose(false, seqNum, idx, enable, x, y, z, qx, qy, qz, qw, vpx, vpy, vpz, vax, vay, vaz, timeoffset);
 			}
 			else if (adr == "/VMT/Joint/Unity")
 			{
-				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				SetPose(false, seqNum, idx, enable, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Joint);
+				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> root_sn >> osc::EndMessage;
+				SetPose(false, seqNum, idx, enable, x, y, -z, qx, qy, -qz, -qw, vpx, vpy, -vpz, vax, vay, vaz, timeoffset, root_sn, ReferMode_t::Joint);
 			}
 			else if (adr == "/VMT/Joint/Driver")
 			{
-				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				SetPose(false, seqNum, idx, enable, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Joint);
+				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> root_sn >> osc::EndMessage;
+				SetPose(false, seqNum, idx, enable, x, y, z, qx, qy, qz, qw, vpx, vpy, vpz, vax, vay, vaz, timeoffset, root_sn, ReferMode_t::Joint);
 			}
 			else if (adr == "/VMT/Follow/Unity")
 			{
-				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				SetPose(false, seqNum, idx, enable, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Follow);
+				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> root_sn >> osc::EndMessage;
+				SetPose(false, seqNum, idx, enable, x, y, -z, qx, qy, -qz, -qw, vpx, vpy, -vpz, vax, vay, vaz, timeoffset, root_sn, ReferMode_t::Follow);
 			}
 			else if (adr == "/VMT/Follow/Driver")
 			{
-				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				SetPose(false, seqNum, idx, enable, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Follow);
+				args >> seqNum >> idx >> enable >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> root_sn >> osc::EndMessage;
+				SetPose(false, seqNum, idx, enable, x, y, z, qx, qy, qz, qw, vpx, vpy, vpz, vax, vay, vaz, timeoffset, root_sn, ReferMode_t::Follow);
 			}
 			
 			// HMD
 			else if (adr == "/VMT/HMD/Room/Unity")
 			{
-				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				SetHmdPose(true, seqNum, x, y, -z, qx, qy, -qz, -qw, timeoffset);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> osc::EndMessage;
+				SetHmdPose(true, seqNum, x, y, -z, qx, qy, -qz, -qw, vpx, vpy, -vpz, vax, vay, vaz, timeoffset);
 			}
 			else if (adr == "/VMT/HMD/Room/Driver")
 			{
-				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				SetHmdPose(true, seqNum, x, y, z, qx, qy, qz, qw, timeoffset);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> osc::EndMessage;
+				SetHmdPose(true, seqNum, x, y, z, qx, qy, qz, qw, vpx, vpy, vpz, vax, vay, vaz, timeoffset);
 			}
 			else if (adr == "/VMT/HMD/Raw/Unity")
 			{
-				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				SetHmdPose(false, seqNum, x, y, -z, qx, qy, -qz, -qw, timeoffset);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> osc::EndMessage;
+				SetHmdPose(false, seqNum, x, y, -z, qx, qy, -qz, -qw, vpx, vpy, -vpz, vax, vay, vaz, timeoffset);
 			}
 			else if (adr == "/VMT/HMD/Raw/Driver")
 			{
-				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> osc::EndMessage;
-				SetHmdPose(false, seqNum, x, y, z, qx, qy, qz, qw, timeoffset);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> osc::EndMessage;
+				SetHmdPose(false, seqNum, x, y, z, qx, qy, qz, qw, vpx, vpy, vpz, vax, vay, vaz, timeoffset);
 			}
 			else if (adr == "/VMT/HMD/Joint/Unity")
 			{
-				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				SetHmdPose(false, seqNum, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Joint);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> root_sn >> osc::EndMessage;
+				SetHmdPose(false, seqNum, x, y, -z, qx, qy, -qz, -qw, vpx, vpy, -vpz, vax, vay, vaz, timeoffset, root_sn, ReferMode_t::Joint);
 			}
 			else if (adr == "/VMT/HMD/Joint/Driver")
 			{
-				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				SetHmdPose(false, seqNum, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Joint);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> root_sn >> osc::EndMessage;
+				SetHmdPose(false, seqNum, x, y, z, qx, qy, qz, qw, vpx, vpy, vpz, vax, vay, vaz, timeoffset, root_sn, ReferMode_t::Joint);
 			}
 			else if (adr == "/VMT/HMD/Follow/Unity")
 			{
-				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				SetHmdPose(false, seqNum, x, y, -z, qx, qy, -qz, -qw, timeoffset, root_sn, ReferMode_t::Follow);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> root_sn >> osc::EndMessage;
+				SetHmdPose(false, seqNum, x, y, -z, qx, qy, -qz, -qw, vpx, vpy, -vpz, vax, vay, vaz, timeoffset, root_sn, ReferMode_t::Follow);
 			}
 			else if (adr == "/VMT/HMD/Follow/Driver")
 			{
-				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> root_sn >> osc::EndMessage;
-				SetHmdPose(false, seqNum, x, y, z, qx, qy, qz, qw, timeoffset, root_sn, ReferMode_t::Follow);
+				args >> seqNum >> timeoffset >> x >> y >> z >> qx >> qy >> qz >> qw >> vpx >> vpy >> vpz >> vax >> vay >> vaz >> root_sn >> osc::EndMessage;
+				SetHmdPose(false, seqNum, x, y, z, qx, qy, qz, qw, vpx, vpy, vpz, vax, vay, vaz, timeoffset, root_sn, ReferMode_t::Follow);
 			}
 
 			// HMD Settings
@@ -485,14 +509,6 @@ namespace VMTDriver {
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
 					GetServer()->GetDevice(idx).UpdateBatteryProperty(batteryValue);
-				}
-			}
-			else if (adr == "/VMT/Property/Velocity")
-			{
-				args >> idx >> velocityEnable >> osc::EndMessage;
-				if (GetServer()->IsVMTDeviceIndex(idx))
-				{
-					GetServer()->GetDevice(idx).SetVelocity(velocityEnable > 0);
 				}
 			}
 			//すべてのデバイスのリセット

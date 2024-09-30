@@ -57,6 +57,7 @@ namespace VMTDriver {
 		bool roomToDriver{};
 		int idx{};
 		int enable{};
+
 		double x{};
 		double y{};
 		double z{};
@@ -64,6 +65,14 @@ namespace VMTDriver {
 		double qy{};
 		double qz{};
 		double qw{};
+
+		double vpx{};
+		double vpy{};
+		double vpz{};
+		double vax{};
+		double vay{};
+		double vaz{};
+
 		double timeoffset{};
 		ReferMode_t mode{};
 		std::string root_sn{};
@@ -80,7 +89,6 @@ namespace VMTDriver {
 		TrackedDeviceIndex_t m_deviceIndex{ 0 };
 		PropertyContainerHandle_t m_propertyContainer{ 0 };
 		uint32_t m_index = k_unTrackedDeviceIndexInvalid;
-		bool m_enableVelocity = false;
 
 		DriverPose_t m_pose{ 0 };
 		RawHmdPose m_rawPose{ 0 };
@@ -110,11 +118,7 @@ namespace VMTDriver {
 		void SetupDisplaySettings(DisplaySettings displaySettings);
 		void SetupRenderSettings(RenderSettings displaySettings);
 		void SetIpdMeters(float userIpdMeters);
-		void SetVelocity(bool enable);
 		DriverPose_t RawPoseToPose();
-		void CalcVelocity(DriverPose_t & pose);
-		void CompensateVelocity(DriverPose_t & pose);
-		Eigen::Quaterniond QuaternionFromAngularVelocity(const Eigen::Vector3d & angularVelocity, double deltaTime);
 		void RegisterToVRSystem();
 		void UpdatePoseToVRSystem();
 		void Reset();

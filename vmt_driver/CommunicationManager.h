@@ -30,18 +30,15 @@ namespace VMTDriver {
 
 	class OSCReceiver : public osc::OscPacketListener {
 	private:
-		void SetPose(bool roomToDriver, 
-					int seqNum,
-					int idx, int enable,
-		             double x, double y, double z,
-		             double qx, double qy, double qz, double qw,
-		             double timeoffset,
-		             const char* root_sn = nullptr,
-		             ReferMode_t mode = ReferMode_t::None);
-		void SetHmdPose(bool roomToDriver, 
+		void SetPose(bool roomToDriver, int seqNum, int idx, int enable, 
+			double x, double y, double z, double qx, double qy, double qz, double qw, 
+			double vpx, double vpy, double vpz, double vax, double vay, double vaz, 
+			double timeoffset, const char * root_sn = nullptr, ReferMode_t mode = ReferMode_t::None);
+		void SetHmdPose(bool roomToDriver,
 			int seqNum,
 			double x, double y, double z, 
 			double qx, double qy, double qz, double qw, 
+			double vpx, double vpy, double vpz, double vax, double vay, double vaz,
 			double timeoffset, 
 			const char * root_sn = nullptr,
 			ReferMode_t mode = ReferMode_t::None);

@@ -116,11 +116,6 @@ namespace VMTDriver {
 		VRProperties()->SetFloatProperty(m_propertyContainer, Prop_UserIpdMeters_Float, m_userIpdMeters);
 	}
 
-	void HMDDeviceServerDriver::SetVelocity(bool enable)
-	{
-		m_enableVelocity = enable;
-	}
-
 	//Joint計算を行う
 	void HMDDeviceServerDriver::CalcJoint(DriverPose_t& pose, string serial, ReferMode_t mode, Eigen::Affine3d& RoomToDriverAffin) {
 		vr::TrackedDevicePose_t devicePoses[k_unMaxTrackedDeviceCount]{};
@@ -299,9 +294,9 @@ namespace VMTDriver {
 		pose.vecPosition[1] = m_rawPose.y;
 		pose.vecPosition[2] = m_rawPose.z;
 
-		pose.vecVelocity[0] = 0.0f;
-		pose.vecVelocity[1] = 0.0f;
-		pose.vecVelocity[2] = 0.0f;
+		pose.vecVelocity[0] = m_rawPose.vpx;
+		pose.vecVelocity[1] = m_rawPose.vpy;
+		pose.vecVelocity[2] = m_rawPose.vpz;
 
 		pose.vecAcceleration[0] = 0.0f;
 		pose.vecAcceleration[1] = 0.0f;
@@ -312,9 +307,9 @@ namespace VMTDriver {
 		pose.qRotation.z = m_rawPose.qz;
 		pose.qRotation.w = m_rawPose.qw;
 
-		pose.vecAngularVelocity[0] = 0.0f;
-		pose.vecAngularVelocity[1] = 0.0f;
-		pose.vecAngularVelocity[2] = 0.0f;
+		pose.vecAngularVelocity[0] = m_rawPose.vax;
+		pose.vecAngularVelocity[1] = m_rawPose.vay;
+		pose.vecAngularVelocity[2] = m_rawPose.vaz;
 
 		pose.vecAngularAcceleration[0] = 0.0f;
 		pose.vecAngularAcceleration[1] = 0.0f;
@@ -342,13 +337,6 @@ namespace VMTDriver {
 			//デバイス = 接続済み・無効
 			RejectTracking(pose);
 			return pose;
-		}
-
-		//速度エミュレーションが有効な場合、速度・各速度の計算を行い、更新する
-		if (m_enableVelocity)
-		{
-			CalcVelocity(pose);
-			CompensateVelocity(pose);
 		}
 
 		//トラッキングモードに合わせて処理する
@@ -379,114 +367,6 @@ namespace VMTDriver {
 		}
 		}
 		return pose;
-	}
-
-	void HMDDeviceServerDriver::CalcVelocity(DriverPose_t& pose) {
-		double smoothingFactor = Config::GetInstance()->GetVelocitySmoothingFactor();
-		if (smoothingFactor <= 0.00)
-			return;
-
-		if (smoothingFactor > 1.0)
-			smoothingFactor = 1.0;
-
-		double delta_time = std::chrono::duration_cast<std::chrono::microseconds>(m_rawPose.time - m_lastRawPose.time).count() / (1000.0 * 1000.0);
-		if (delta_time <= std::numeric_limits<double>::epsilon())
-			return;
-
-		// Linear Velocity
-		Eigen::Vector3d newVel(
-			(m_rawPose.x - m_lastRawPose.x) / delta_time,
-			(m_rawPose.y - m_lastRawPose.y) / delta_time,
-			(m_rawPose.z - m_lastRawPose.z) / delta_time
-		);
-
-		Eigen::Vector3d posVelocity(
-			smoothingFactor * newVel.x() + (1.0 - smoothingFactor) * m_lastVecVeloctiy[0],
-			smoothingFactor * newVel.y() + (1.0 - smoothingFactor) * m_lastVecVeloctiy[1],
-			smoothingFactor * newVel.z() + (1.0 - smoothingFactor) * m_lastVecVeloctiy[2]
-		);
-
-		// Angular Velocity
-		Eigen::Quaterniond newQuat(m_rawPose.qw, m_rawPose.qx, m_rawPose.qy, m_rawPose.qz);
-		Eigen::Quaterniond oldQuat(m_lastRawPose.qw, m_lastRawPose.qx, m_lastRawPose.qy, m_lastRawPose.qz);
-
-		Eigen::Vector3d vecAngularVelocity = AngularVelocityBetweenQuats(oldQuat, newQuat, delta_time);
-
-		Eigen::Vector3d angVelocity(
-			smoothingFactor * vecAngularVelocity.x() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[0],
-			smoothingFactor * vecAngularVelocity.y() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[1],
-			smoothingFactor * vecAngularVelocity.z() + (1.0 - smoothingFactor) * m_lastAngVeloctiy[2]
-		);
-
-		pose.vecVelocity[0] = posVelocity[0];
-		pose.vecVelocity[1] = posVelocity[1];
-		pose.vecVelocity[2] = posVelocity[2];
-		pose.vecAngularVelocity[0] = angVelocity[0];
-		pose.vecAngularVelocity[1] = angVelocity[1];
-		pose.vecAngularVelocity[2] = angVelocity[2];
-
-		m_lastVecVeloctiy[0] = posVelocity[0];
-		m_lastVecVeloctiy[1] = posVelocity[1];
-		m_lastVecVeloctiy[2] = posVelocity[2];
-		m_lastAngVeloctiy[0] = angVelocity[0];
-		m_lastAngVeloctiy[1] = angVelocity[1];
-		m_lastAngVeloctiy[2] = angVelocity[2];
-	}
-
-	void HMDDeviceServerDriver::CompensateVelocity(DriverPose_t& pose) {
-		double delta_time = std::chrono::duration_cast<std::chrono::microseconds>(m_rawPose.time - m_lastRawPose.time).count() / (1000.0 * 1000.0);
-		if (delta_time <= std::numeric_limits<double>::epsilon())
-			return;
-
-		// Compensate linear velocity
-		Eigen::Vector3d compPosition(
-			pose.vecPosition[0] - (pose.vecVelocity[0] * delta_time),
-			pose.vecPosition[1] - (pose.vecVelocity[1] * delta_time),
-			pose.vecPosition[2] - (pose.vecVelocity[2] * delta_time)
-		);
-
-		// Compensate angular velocity
-		Eigen::Quaterniond angularCorrection = QuaternionFromAngularVelocity(
-			Eigen::Vector3d(pose.vecAngularVelocity[0], pose.vecAngularVelocity[1], pose.vecAngularVelocity[2]), delta_time
-		);
-		Eigen::Quaterniond newQuat(pose.qRotation.w, pose.qRotation.x, pose.qRotation.y, pose.qRotation.z);
-		Eigen::Quaterniond compRotation = newQuat * angularCorrection.conjugate();
-
-		pose.vecPosition[0] = compPosition[0];
-		pose.vecPosition[1] = compPosition[1];
-		pose.vecPosition[2] = compPosition[2];
-		pose.qRotation.x = compRotation.x();
-		pose.qRotation.y = compRotation.y();
-		pose.qRotation.z = compRotation.z();
-		pose.qRotation.w = compRotation.w();
-	}
-
-	Eigen::Quaterniond HMDDeviceServerDriver::QuaternionFromAngularVelocity(
-		const Eigen::Vector3d& angularVelocity, double deltaTime
-	) {
-		// Only convert to quaternion if angular velocity is significant
-		if (angularVelocity.norm() < std::numeric_limits<double>::epsilon()) {
-			return Eigen::Quaterniond::Identity(); // No rotation
-		}
-
-		// Create the quaternion for angular velocity
-		double halfTheta = angularVelocity.norm() * deltaTime * 0.5;
-		Eigen::Vector3d axis = angularVelocity.normalized();
-		double sinHalfAngle = sin(halfTheta);
-
-		return Eigen::Quaterniond(cos(halfTheta), axis.x() * sinHalfAngle, axis.y() * sinHalfAngle, axis.z() * sinHalfAngle);
-	}
-
-	// Sourced from https://mariogc.com/post/angular-velocity-quaternions/
-	Eigen::Vector3d HMDDeviceServerDriver::AngularVelocityBetweenQuats(
-		const Eigen::Quaterniond& q1, const Eigen::Quaterniond& q2, double dt
-	) {
-		double r = (2.0f / dt);
-
-		return Eigen::Vector3d(
-			(q1.w() * q2.x() - q1.x() * q2.w() - q1.y() * q2.z() + q1.z() * q2.y()) * r,
-			(q1.w() * q2.y() + q1.x() * q2.z() - q1.y() * q2.w() - q1.z() * q2.x()) * r,
-			(q1.w() * q2.z() - q1.x() * q2.y() + q1.y() * q2.x() - q1.z() * q2.w()) * r);
 	}
 
 	//仮想デバイスからOpenVRへデバイスの登録を依頼する
