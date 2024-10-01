@@ -79,7 +79,8 @@ namespace VMTDriver {
 		bool m_lastVecValid = false;
 		bool m_lastAngValid = false;
 
-		VRInputComponentHandle_t ButtonComponent[8]{ 0 };
+		int m_registeredButtons = 0;
+		VRInputComponentHandle_t ButtonComponent[32]{ 0 };
 		VRInputComponentHandle_t TriggerComponent[2]{ 0 };
 		VRInputComponentHandle_t JoystickComponent[2]{ 0 };
 		VRInputComponentHandle_t HapticComponent{ 0 };

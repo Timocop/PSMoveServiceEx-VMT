@@ -414,7 +414,7 @@ namespace VMTDriver {
     void TrackedDeviceServerDriver::UpdateButtonInput(uint32_t index, bool value, double timeoffset)
     {
         if (!m_alreadyRegistered) { return; }
-        if (0 <= index && index <= 7)
+        if (0 <= index && index < m_registeredButtons)
         {
             VRDriverInput()->UpdateBooleanComponent(ButtonComponent[index], value, timeoffset);
         }
@@ -434,7 +434,7 @@ namespace VMTDriver {
             value = 0;
         }
 
-        if (0 <= index && index <= 1)
+        if (0 <= index && index < 2)
         {
             VRDriverInput()->UpdateScalarComponent(TriggerComponent[index], value, timeoffset);
         }
@@ -585,6 +585,8 @@ namespace VMTDriver {
 
         //OpenVR プロパティコンテナの保持
         m_propertyContainer = VRProperties()->TrackedDeviceToPropertyContainer(unObjectId);
+		m_registeredButtons = 0;
+
 
 		switch (m_trackerType)
 		{
@@ -698,10 +700,10 @@ namespace VMTDriver {
 				//	SKELETON_BONE_COUNT,
 				//	&m_compSkeleton);
 
-				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/x/click", &ButtonComponent[0]);
-				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/x/touch", &ButtonComponent[0]);
-				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/y/click", &ButtonComponent[1]);
-				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/y/touch", &ButtonComponent[1]);
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/x/click", &ButtonComponent[m_registeredButtons++]); // 0
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/x/touch", &ButtonComponent[m_registeredButtons++]); // 1
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/y/click", &ButtonComponent[m_registeredButtons++]); // 2
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/y/touch", &ButtonComponent[m_registeredButtons++]); // 3
 			}
 			else 
 			{
@@ -727,23 +729,28 @@ namespace VMTDriver {
 				//	SKELETON_BONE_COUNT,
 				//	&m_compSkeleton);
 
-				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/a/click", &ButtonComponent[0]);
-				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/a/touch", &ButtonComponent[0]);
-				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/b/click", &ButtonComponent[1]);
-				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/b/touch", &ButtonComponent[1]);
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/a/click", &ButtonComponent[m_registeredButtons++]); // 0
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/a/touch", &ButtonComponent[m_registeredButtons++]); // 1
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/b/click", &ButtonComponent[m_registeredButtons++]); // 2
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/b/touch", &ButtonComponent[m_registeredButtons++]); // 3
 			}
 
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/system/click", &ButtonComponent[2]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/system/touch", &ButtonComponent[2]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/grip/click", &ButtonComponent[3]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/grip/touch", &ButtonComponent[3]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/joystick/click", &ButtonComponent[4]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/joystick/touch", &ButtonComponent[4]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/back/click", &ButtonComponent[5]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/guide/click", &ButtonComponent[6]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/start/click", &ButtonComponent[7]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trigger/click", &ButtonComponent[8]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trigger/touch", &ButtonComponent[8]);
+			if (m_trackerType == eTrackerType::TrackerType_OculusLeftController) {
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/system/click", &ButtonComponent[m_registeredButtons++]); // 4
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/system/touch", &ButtonComponent[m_registeredButtons++]); // 5
+			}
+			else
+			{
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/back/click", &ButtonComponent[m_registeredButtons++]); // 4
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/guide/click", &ButtonComponent[m_registeredButtons++]); // 5
+			}
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/grip/click", &ButtonComponent[m_registeredButtons++]); // 6
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/grip/touch", &ButtonComponent[m_registeredButtons++]); // 7
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/joystick/click", &ButtonComponent[m_registeredButtons++]); // 8
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/joystick/touch", &ButtonComponent[m_registeredButtons++]); // 9
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/start/click", &ButtonComponent[m_registeredButtons++]); // 10
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trigger/click", &ButtonComponent[m_registeredButtons++]); // 11
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trigger/touch", &ButtonComponent[m_registeredButtons++]); // 12
 
 			VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/joystick/x", &JoystickComponent[0], VRScalarType_Absolute, VRScalarUnits_NormalizedTwoSided);
 			VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/joystick/y", &JoystickComponent[1], VRScalarType_Absolute, VRScalarUnits_NormalizedTwoSided);
@@ -817,12 +824,12 @@ namespace VMTDriver {
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceAlertLow_String, "{htc}/icons/controller_status_ready_low.png");
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ControllerType_String, "vive_controller");
 
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/system/click", &ButtonComponent[0]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trigger/click", &ButtonComponent[1]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trackpad/touch", &ButtonComponent[2]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trackpad/click", &ButtonComponent[3]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/grip/click", &ButtonComponent[4]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/application_menu/click", &ButtonComponent[5]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/system/click", &ButtonComponent[m_registeredButtons++]); // 0
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trigger/click", &ButtonComponent[m_registeredButtons++]); // 1
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trackpad/touch", &ButtonComponent[m_registeredButtons++]); // 2
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trackpad/click", &ButtonComponent[m_registeredButtons++]); // 3
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/grip/click", &ButtonComponent[m_registeredButtons++]); // 4
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/application_menu/click", &ButtonComponent[m_registeredButtons++]); // 5
 
 			VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/trigger/value", &TriggerComponent[0], VRScalarType_Absolute, VRScalarUnits_NormalizedOneSided);
 			VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/trackpad/x", &JoystickComponent[0], VRScalarType_Absolute, VRScalarUnits_NormalizedTwoSided);
@@ -907,7 +914,7 @@ namespace VMTDriver {
 			VRProperties()->SetStringProperty(m_propertyContainer, 	Prop_ControllerType_String, "vive_tracker");
 
 			// Create components
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/system/click", &ButtonComponent[0]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/system/click", &ButtonComponent[m_registeredButtons++]); // 0
 			VRDriverInput()->CreateHapticComponent(m_propertyContainer, "/output/haptic", &HapticComponent);
 			break;
 		}
@@ -1092,14 +1099,14 @@ namespace VMTDriver {
 
 
 			//OpenVR デバイス入力情報の定義
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button0/click", &ButtonComponent[0]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button1/click", &ButtonComponent[1]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button2/click", &ButtonComponent[2]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button3/click", &ButtonComponent[3]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button4/click", &ButtonComponent[4]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button5/click", &ButtonComponent[5]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button6/click", &ButtonComponent[6]);
-			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button7/click", &ButtonComponent[7]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button0/click", &ButtonComponent[m_registeredButtons++]); // 0
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button1/click", &ButtonComponent[m_registeredButtons++]); // 1
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button2/click", &ButtonComponent[m_registeredButtons++]); // 2
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button3/click", &ButtonComponent[m_registeredButtons++]); // 3
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button4/click", &ButtonComponent[m_registeredButtons++]); // 4
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button5/click", &ButtonComponent[m_registeredButtons++]); // 5
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button6/click", &ButtonComponent[m_registeredButtons++]); // 6
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/Button7/click", &ButtonComponent[m_registeredButtons++]); // 7
 
 			VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/Trigger0/value", &TriggerComponent[0], EVRScalarType::VRScalarType_Absolute, EVRScalarUnits::VRScalarUnits_NormalizedOneSided);
 			VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/Trigger1/value", &TriggerComponent[1], EVRScalarType::VRScalarType_Absolute, EVRScalarUnits::VRScalarUnits_NormalizedOneSided);
