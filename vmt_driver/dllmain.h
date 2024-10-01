@@ -62,6 +62,8 @@ namespace VMTDriver {
 		TrackerType_HtcTracker,
 		TrackerType_HtcLeftController,
 		TrackerType_HtcRightController,
+		TrackerType_OculusLeftController,
+		TrackerType_OculusRightController,
 		TrackerType_HtcBasestation
 	};
 

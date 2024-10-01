@@ -340,6 +340,20 @@ namespace VMTDriver {
 				m_registrationInProgress = true;
 				break;
 
+			case eTrackerType::TrackerType_OculusRightController:
+				m_trackerType = type;
+
+				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
+				m_registrationInProgress = true;
+				break;
+
+			case eTrackerType::TrackerType_OculusLeftController:
+				m_trackerType = type;
+
+				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
+				m_registrationInProgress = true;
+				break;
+
 			case eTrackerType::TrackerType_HtcRightController:
 				m_trackerType = type;
 
@@ -563,6 +577,7 @@ namespace VMTDriver {
     //** OpenVR向け関数群 **
 
     //OpenVRからのデバイス有効化コール
+	// See: https://github.com/ValveSoftware/openvr/blob/master/docs/Driver_API_Documentation.md
     EVRInitError TrackedDeviceServerDriver::Activate(uint32_t unObjectId)
     {
         //OpenVR Indexの記録
@@ -605,6 +620,138 @@ namespace VMTDriver {
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceStandby_String, "{htc}/icons/base_status_standby.png");
 			VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceAlertLow_String, "{htc}/icons/base_status_error.png");
 
+			break;
+		}
+		case eTrackerType::TrackerType_OculusLeftController:
+		case eTrackerType::TrackerType_OculusRightController:
+		{
+			if (m_trackerType == eTrackerType::TrackerType_OculusLeftController)
+			{
+				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_LeftHand);
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, "oculus/WMHD315M3010GV_Controller_Left");
+				//VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, "LHR-F94B3BD8");
+			}
+			else
+			{
+				VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_RightHand);
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, "oculus/WMHD315M3010GV_Controller_Right");
+				//VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, "LHR-F94B3BD9");
+			}
+
+			//std::string registeredDeviceType = Config::GetInstance()->GetDriverName();
+			//registeredDeviceType += "/";
+			//registeredDeviceType += m_serial.c_str();
+			//VRProperties()->SetStringProperty(m_propertyContainer, Prop_RegisteredDeviceType_String, registeredDeviceType.c_str());
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_SerialNumber_String, m_serial.c_str());
+
+			std::string trackingSystemName = Config::GetInstance()->GetDriverName();
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_TrackingSystemName_String, trackingSystemName.c_str());
+			VRProperties()->SetUint64Property(m_propertyContainer, Prop_CurrentUniverseId_Uint64, TRACKING_UNIVERSE_ID);
+			VRProperties()->SetUint64Property(m_propertyContainer, Prop_PreviousUniverseId_Uint64, TRACKING_UNIVERSE_ID);
+
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_WillDriftInYaw_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DeviceIsWireless_Bool, true);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DeviceIsCharging_Bool, false);
+			VRProperties()->SetFloatProperty(m_propertyContainer, Prop_DeviceBatteryPercentage_Float, 1.f);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_UpdateAvailable_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_ManualUpdate_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DeviceProvidesBatteryStatus_Bool, true);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_DeviceCanPowerOff_Bool, true);
+			VRProperties()->SetInt32Property(m_propertyContainer, Prop_DeviceClass_Int32, TrackedDeviceClass_Controller);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_ForceUpdateRequired_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Identifiable_Bool, true);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_Firmware_RemindUpdate_Bool, false);
+			VRProperties()->SetInt32Property(m_propertyContainer, Prop_Axis0Type_Int32, k_eControllerAxis_Joystick);
+
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasDisplayComponent_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasCameraComponent_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasDriverDirectModeComponent_Bool, false);
+			VRProperties()->SetBoolProperty(m_propertyContainer, Prop_HasVirtualDisplayComponent_Bool, false);
+			VRProperties()->SetInt32Property(m_propertyContainer, Prop_ControllerHandSelectionPriority_Int32, 0);
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ManufacturerName_String, "Oculus");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ResourceRoot_String, "oculus");
+
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_InputProfilePath_String, "{oculus}/input/touch_profile.json");
+			VRProperties()->SetStringProperty(m_propertyContainer, Prop_ControllerType_String, "oculus_touch");
+
+			if (m_trackerType == eTrackerType::TrackerType_OculusLeftController)
+			{
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_ModelNumber_String, "Oculus Quest2 (Left Controller)");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_RenderModelName_String, "oculus_quest2_controller_left");
+
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceOff_String, "{oculus}/icons/rifts_left_controller_off.png");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearching_String, "{oculus}/icons/rifts_left_controller_searching.gif");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearchingAlert_String, "{oculus}/icons/rifts_left_controller_searching_alert.gif");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReady_String, "{oculus}/icons/rifts_left_controller_ready.png");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReadyAlert_String, "{oculus}/icons/rifts_left_controller_ready_alert.png");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceNotReady_String, "{oculus}/icons/rifts_left_controller_error.png");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceStandby_String, "{oculus}/icons/rifts_left_controller_off.png");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceAlertLow_String, "{oculus}/icons/rifts_left_controller_ready_low.png");
+
+				//VRDriverInput()->CreateSkeletonComponent(
+				//	m_propertyContainer,
+				//	"/input/skeleton/right",
+				//	"/skeleton/hand/right",
+				//	"/pose/raw",
+				//	EVRSkeletalTrackingLevel::VRSkeletalTracking_Partial,
+				//	nullptr,
+				//	SKELETON_BONE_COUNT,
+				//	&m_compSkeleton);
+
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/x/click", &ButtonComponent[0]);
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/x/touch", &ButtonComponent[0]);
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/y/click", &ButtonComponent[1]);
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/y/touch", &ButtonComponent[1]);
+			}
+			else 
+			{
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_ModelNumber_String, "Oculus Quest2 (Right Controller)");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_RenderModelName_String, "oculus_quest2_controller_right");
+
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceOff_String, "{oculus}/icons/rifts_right_controller_off.png");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearching_String, "{oculus}/icons/rifts_right_controller_searching.gif");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceSearchingAlert_String, "{oculus}/icons/rifts_right_controller_searching_alert.gif");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReady_String, "{oculus}/icons/rifts_right_controller_ready.png");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceReadyAlert_String, "{oculus}/icons/rifts_right_controller_ready_alert.png");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceNotReady_String, "{oculus}/icons/rifts_right_controller_error.png");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceStandby_String, "{oculus}/icons/rifts_right_controller_off.png");
+				VRProperties()->SetStringProperty(m_propertyContainer, Prop_NamedIconPathDeviceAlertLow_String, "{oculus}/icons/rifts_right_controller_ready_low.png");
+
+				//VRDriverInput()->CreateSkeletonComponent(
+				//	m_propertyContainer,
+				//	"/input/skeleton/left",
+				//	"/skeleton/hand/left",
+				//	"/pose/raw",
+				//	EVRSkeletalTrackingLevel::VRSkeletalTracking_Partial,
+				//	nullptr,
+				//	SKELETON_BONE_COUNT,
+				//	&m_compSkeleton);
+
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/a/click", &ButtonComponent[0]);
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/a/touch", &ButtonComponent[0]);
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/b/click", &ButtonComponent[1]);
+				VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/b/touch", &ButtonComponent[1]);
+			}
+
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/system/click", &ButtonComponent[2]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/system/touch", &ButtonComponent[2]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/grip/click", &ButtonComponent[3]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/grip/touch", &ButtonComponent[3]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/joystick/click", &ButtonComponent[4]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/joystick/touch", &ButtonComponent[4]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/back/click", &ButtonComponent[5]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/guide/click", &ButtonComponent[6]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/start/click", &ButtonComponent[7]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trigger/click", &ButtonComponent[8]);
+			VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trigger/touch", &ButtonComponent[8]);
+
+			VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/joystick/x", &JoystickComponent[0], VRScalarType_Absolute, VRScalarUnits_NormalizedTwoSided);
+			VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/joystick/y", &JoystickComponent[1], VRScalarType_Absolute, VRScalarUnits_NormalizedTwoSided);
+
+			VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/trigger/value", &TriggerComponent[0], VRScalarType_Absolute, VRScalarUnits_NormalizedOneSided);
+			VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/grip/value", &TriggerComponent[1], VRScalarType_Absolute, VRScalarUnits_NormalizedOneSided);
+
+			VRDriverInput()->CreateHapticComponent(m_propertyContainer, "/output/haptic", &HapticComponent);
 			break;
 		}
 		case eTrackerType::TrackerType_HtcLeftController:
