@@ -79,7 +79,7 @@ namespace VMTDriver {
 		bool m_lastVecValid = false;
 		bool m_lastAngValid = false;
 
-		int m_registeredButtons = 0;
+		uint32_t m_registeredButtons = 0;
 		VRInputComponentHandle_t ButtonComponent[32]{ 0 };
 		VRInputComponentHandle_t TriggerComponent[2]{ 0 };
 		VRInputComponentHandle_t JoystickComponent[2]{ 0 };
@@ -104,8 +104,6 @@ namespace VMTDriver {
 		void UpdateBatteryProperty(float value);
 		void Reset();
 
-		Eigen::Quaterniond QuaternionFromAngularVelocity(const Eigen::Vector3d & angularVelocity, double deltaTime);
-		Eigen::Vector3d AngularVelocityBetweenQuats(const Eigen::Quaterniond & q1, const Eigen::Quaterniond & q2, double dt);
         void CalcJoint(DriverPose_t& pose, string serial, ReferMode_t mode, Eigen::Affine3d& RoomToDriverAffin);
         static int SearchDevice(vr::TrackedDevicePose_t* poses, string serial);
         void RejectTracking(DriverPose_t& pose);

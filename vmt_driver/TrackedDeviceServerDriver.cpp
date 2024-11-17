@@ -414,7 +414,7 @@ namespace VMTDriver {
     void TrackedDeviceServerDriver::UpdateButtonInput(uint32_t index, bool value, double timeoffset)
     {
         if (!m_alreadyRegistered) { return; }
-        if (0 <= index && index < m_registeredButtons)
+        if (index >= 0 && index < m_registeredButtons)
         {
             VRDriverInput()->UpdateBooleanComponent(ButtonComponent[index], value, timeoffset);
         }

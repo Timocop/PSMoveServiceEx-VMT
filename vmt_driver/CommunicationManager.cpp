@@ -254,7 +254,7 @@ namespace VMTDriver {
 	}
 
 	//エラー情報を送信する
-	void OSCReceiver::SendHmdInfo(float framerate, float screenWidth, float screenHeight, bool directMode) {
+	void OSCReceiver::SendHmdInfo(float framerate, int screenWidth, int screenHeight, bool directMode) {
 		const size_t bufsize = 8192;
 		char buf[bufsize]{};
 		osc::OutboundPacketStream packet(buf, bufsize);
@@ -308,27 +308,29 @@ namespace VMTDriver {
 		int seqNum{};
 		int idx{};
 		int enable{};
-		float timeoffset{};
-		float x{};
-		float y{};
-		float z{};
-		float qx{};
-		float qy{};
-		float qz{};
-		float qw{};
-		float vpx{};
-		float vpy{};
-		float vpz{};
-		float vax{};
-		float vay{};
-		float vaz{};
+		double timeoffset{};
+		double x{};
+		double y{};
+		double z{};
+		double qx{};
+		double qy{};
+		double qz{};
+		double qw{};
+		double vpx{};
+		double vpy{};
+		double vpz{};
+		double vax{};
+		double vay{};
+		double vaz{};
 		int ButtonIndex{};
 		int ButtonValue{};
 		float TriggerValue{};
 		const char* root_sn = nullptr;
 		const char* serialNumber = nullptr;
 		float batteryValue;
-		int velocityEnable;
+
+		float input_x{};
+		float input_y{};
 
 		int display_x{};
 		int display_y{};
@@ -497,10 +499,10 @@ namespace VMTDriver {
 			}
 			else if (adr == "/VMT/Input/Joystick")
 			{
-				args >> idx >> ButtonIndex >> timeoffset >> x >> y >> osc::EndMessage;
+				args >> idx >> ButtonIndex >> timeoffset >> input_x >> input_y >> osc::EndMessage;
 				if (GetServer()->IsVMTDeviceIndex(idx))
 				{
-					GetServer()->GetDevice(idx).UpdateJoystickInput(ButtonIndex, x, y, timeoffset);
+					GetServer()->GetDevice(idx).UpdateJoystickInput(ButtonIndex, input_x, input_y, timeoffset);
 				}
 			}
 			else if (adr == "/VMT/Property/Battery")
