@@ -33,6 +33,7 @@ SOFTWARE.
 #include <thread>
 #include <mutex>
 #include <deque>
+#include <chrono>
 #include "Eigen/Dense"
 #include "json.hpp"
 

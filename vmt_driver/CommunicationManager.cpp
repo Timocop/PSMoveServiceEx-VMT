@@ -216,12 +216,17 @@ namespace VMTDriver {
 
 	//生存信号を送信する
 	void OSCReceiver::SendAlive() {
+		auto now = std::chrono::system_clock::now();
+		auto duration_since_epoch = now.time_since_epoch();
+		auto total_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration_since_epoch).count();
+
 		const size_t bufsize = 8192;
 		char buf[bufsize]{};
 		osc::OutboundPacketStream packet(buf, bufsize);
 		packet << osc::BeginMessage("/VMT/Out/Alive")
 			<< Version.c_str()
 			<< GetServer()->GetInstallPath().c_str()
+			<< total_milliseconds
 			<< osc::EndMessage;
 		DirectOSC::OSC::GetInstance()->GetSocketTx()->Send(packet.Data(), packet.Size());
 	}
