@@ -598,8 +598,6 @@ namespace VMTDriver {
 		}
 
 		Config* config = Config::GetInstance();
-		//起動時設定読み込み
-		config->LoadSetting();
 
 		//通信ポートオープン
 		DirectOSC::OSC::GetInstance()->Open(&m_rcv, config->GetReceivePort(), config->GetSendIp(), config->GetSendPort());

@@ -328,84 +328,84 @@ namespace VMTDriver {
     //仮想デバイスからOpenVRへデバイスの登録を依頼する
     void TrackedDeviceServerDriver::RegisterToVRSystem(eTrackerType type)
     {
-        if (!m_alreadyRegistered && !m_registrationInProgress)
+		if (m_alreadyRegistered || m_registrationInProgress)
+			return;
+
+        // $TODO: Add oculus/index emulation
+		switch (type)
         {
-            // $TODO: Add oculus/index emulation
-			switch (type)
-            {
-			case eTrackerType::TrackerType_HtcBasestation:
-				m_trackerType = type;
+		case eTrackerType::TrackerType_HtcBasestation:
+			m_trackerType = type;
 
-				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_TrackingReference, this);
-				m_registrationInProgress = true;
-				break;
+			m_registrationInProgress = true;
+			VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_TrackingReference, this);
+			break;
 
-			case eTrackerType::TrackerType_OculusRightController:
-				m_trackerType = type;
+		case eTrackerType::TrackerType_OculusRightController:
+			m_trackerType = type;
 
-				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
-				m_registrationInProgress = true;
-				break;
+			m_registrationInProgress = true;
+			VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
+			break;
 
-			case eTrackerType::TrackerType_OculusLeftController:
-				m_trackerType = type;
+		case eTrackerType::TrackerType_OculusLeftController:
+			m_trackerType = type;
 
-				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
-				m_registrationInProgress = true;
-				break;
+			m_registrationInProgress = true;
+			VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
+			break;
 
-			case eTrackerType::TrackerType_HtcRightController:
-				m_trackerType = type;
+		case eTrackerType::TrackerType_HtcRightController:
+			m_trackerType = type;
 
-				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
-				m_registrationInProgress = true;
-				break;
+			m_registrationInProgress = true;
+			VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
+			break;
 
-			case eTrackerType::TrackerType_HtcLeftController:
-				m_trackerType = type;
+		case eTrackerType::TrackerType_HtcLeftController:
+			m_trackerType = type;
 
-				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
-				m_registrationInProgress = true;
-				break;
+			m_registrationInProgress = true;
+			VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
+			break;
 
-			case eTrackerType::TrackerType_HtcTracker:
-				m_trackerType = type;
+		case eTrackerType::TrackerType_HtcTracker:
+			m_trackerType = type;
 
-				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_GenericTracker, this);
-				m_registrationInProgress = true;
-				break;
+			m_registrationInProgress = true;
+			VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_GenericTracker, this);
+			break;
 
-			case eTrackerType::TrackerType_TrackingReference:
-				m_trackerType = type;
+		case eTrackerType::TrackerType_TrackingReference:
+			m_trackerType = type;
 
-				VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_TrackingReference, this);
-				m_registrationInProgress = true;
-				break;
+			m_registrationInProgress = true;
+			VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_TrackingReference, this);
+			break;
 
-			case eTrackerType::TrackerType_RightController:
-				m_trackerType = type;
+		case eTrackerType::TrackerType_RightController:
+			m_trackerType = type;
 
-                VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
-				m_registrationInProgress = true;
-                break;
+			m_registrationInProgress = true;
+            VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
+            break;
 
-			case eTrackerType::TrackerType_LeftController:
-				m_trackerType = type;
+		case eTrackerType::TrackerType_LeftController:
+			m_trackerType = type;
 
-                VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
-				m_registrationInProgress = true;
-                break;
+			m_registrationInProgress = true;
+            VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_Controller, this);
+            break;
 
-			case eTrackerType::TrackerType_GenericTracker:
-				m_trackerType = type;
+		case eTrackerType::TrackerType_GenericTracker:
+			m_trackerType = type;
 
-                VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_GenericTracker, this);
-				m_registrationInProgress = true;
-                break;
+			m_registrationInProgress = true;
+            VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_GenericTracker, this);
+            break;
 
-            default:
-                break;
-            }
+        default:
+            break;
         }
     }
 
@@ -502,6 +502,10 @@ namespace VMTDriver {
         VRServerDriverHost()->TrackedDevicePoseUpdated(m_deviceIndex, GetPose(), sizeof(DriverPose_t));
     }
 
+	void TrackedDeviceServerDriver::RunFrame()
+	{
+	}
+
     //仮想デバイスでOpenVRイベントを処理する(サーバーからイベントがあるタイミングでコールされる)
     void TrackedDeviceServerDriver::ProcessEvent(VREvent_t& VREvent)
     {
@@ -580,6 +584,9 @@ namespace VMTDriver {
 	// See: https://github.com/ValveSoftware/openvr/blob/master/docs/Driver_API_Documentation.md
     EVRInitError TrackedDeviceServerDriver::Activate(uint32_t unObjectId)
     {
+		if (m_alreadyRegistered)
+			return EVRInitError::VRInitError_Unknown;
+
         //OpenVR Indexの記録
         m_deviceIndex = unObjectId;
 
@@ -1129,6 +1136,9 @@ namespace VMTDriver {
     {
         m_deviceIndex = k_unTrackedDeviceIndexInvalid;
         m_propertyContainer = k_ulInvalidPropertyContainer;
+
+		m_alreadyRegistered = false;
+		m_registrationInProgress = false;
     }
 
     //OpenVRからのデバイス電源オフコール

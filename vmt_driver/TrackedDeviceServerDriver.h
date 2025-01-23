@@ -107,7 +107,8 @@ namespace VMTDriver {
         void CalcJoint(DriverPose_t& pose, string serial, ReferMode_t mode, Eigen::Affine3d& RoomToDriverAffin);
         static int SearchDevice(vr::TrackedDevicePose_t* poses, string serial);
         void RejectTracking(DriverPose_t& pose);
-        void ProcessEvent(VREvent_t &VREvent);
+		void RunFrame();
+		void ProcessEvent(VREvent_t &VREvent);
 
         static bool GetDevicePose(Eigen::Affine3d& out_pose, const char* in_serialNumber);
 

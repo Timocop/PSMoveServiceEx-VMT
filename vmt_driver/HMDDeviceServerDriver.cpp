@@ -376,11 +376,11 @@ namespace VMTDriver {
 		if (!m_displayValid || !m_renderValid)
 			return;
 
-		if (!m_alreadyRegistered && !m_registrationInProgress)
-		{
-			VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_HMD, this);
-			m_registrationInProgress = true;
-		}
+		if (m_alreadyRegistered || m_registrationInProgress)
+			return;
+
+		m_registrationInProgress = true;
+		VRServerDriverHost()->TrackedDeviceAdded(m_serial.c_str(), ETrackedDeviceClass::TrackedDeviceClass_HMD, this);
 	}
 
 	//仮想デバイスの状態をリセットする
@@ -409,27 +409,29 @@ namespace VMTDriver {
 		VRServerDriverHost()->TrackedDevicePoseUpdated(m_deviceIndex, GetPose(), sizeof(DriverPose_t));
 	}
 
-	//仮想デバイスでOpenVRイベントを処理する(サーバーからイベントがあるタイミングでコールされる)
-	void HMDDeviceServerDriver::ProcessEvent(VREvent_t& VREvent)
+	void HMDDeviceServerDriver::RunFrame()
 	{
 		//未登録 or 電源オフ時は反応しない
 		if (!m_alreadyRegistered || !m_poweron) {
 			return;
 		}
 
-		//異常値を除去(なんで送られてくるんだ？)
-		if (VREvent_VendorSpecific_Reserved_End < VREvent.eventType) {
-			return;
+		if (m_displayValid && m_propertyContainer != k_ulInvalidPropertyContainer)
+		{
+			if (m_frame > frameCycle) {
+				float frameRate = VRProperties()->GetFloatProperty(m_propertyContainer, Prop_DisplayFrequency_Float);
+
+				OSCReceiver::SendHmdInfo(frameRate, m_displaySettings.display_w, m_displaySettings.display_h, m_displaySettings.directMode);
+
+				m_frame = 0;
+			}
+			m_frame++;
 		}
+	}
 
-		if (m_displayValid && m_frame > frameCycle) {
-			float frameRate = VRProperties()->GetFloatProperty(m_propertyContainer, Prop_DisplayFrequency_Float);
-
-			OSCReceiver::SendHmdInfo(frameRate, m_displaySettings.display_w, m_displaySettings.display_h, m_displaySettings.directMode);
-
-			m_frame = 0;
-		}
-		m_frame++;
+	//仮想デバイスでOpenVRイベントを処理する(サーバーからイベントがあるタイミングでコールされる)
+	void HMDDeviceServerDriver::ProcessEvent(VREvent_t& VREvent)
+	{
 	}
 
 	/**
@@ -478,6 +480,9 @@ namespace VMTDriver {
 	//OpenVRからのデバイス有効化コール
 	EVRInitError HMDDeviceServerDriver::Activate(uint32_t unObjectId)
 	{
+		if (m_alreadyRegistered)
+			return EVRInitError::VRInitError_Unknown;
+
 		//OpenVR Indexの記録
 		m_deviceIndex = unObjectId;
 
@@ -543,6 +548,9 @@ namespace VMTDriver {
 	{
 		m_deviceIndex = k_unTrackedDeviceIndexInvalid;
 		m_propertyContainer = k_ulInvalidPropertyContainer;
+
+		m_alreadyRegistered = false;
+		m_registrationInProgress = false;
 	}
 
 	//OpenVRからのデバイス電源オフコール
@@ -555,14 +563,9 @@ namespace VMTDriver {
 	//OpenVRからのデバイス固有機能の取得(ない場合はnullptrを返す)
 	void* HMDDeviceServerDriver::GetComponent(const char* pchComponentNameAndVersion)
 	{
-		if (!pchComponentNameAndVersion)
+		if (!_stricmp(pchComponentNameAndVersion, vr::IVRDisplayComponent_Version))
 		{
-			return nullptr;
-		}
-
-		if (std::string{pchComponentNameAndVersion} == vr::IVRDisplayComponent_Version)
-		{
-			return static_cast<vr::IVRDisplayComponent *>(this);
+			return (vr::IVRDisplayComponent*)this;
 		}
 
 		return nullptr;

@@ -119,8 +119,9 @@ namespace VMTDriver {
         //ドライバのインストールパス取得
         m_installPath = VRProperties()->GetStringProperty(m_pDriverContext->GetDriverHandle(), Prop_InstallPath_String);
 
-        //通信のオープン
-        CommunicationManager::GetInstance()->Open();
+		//Load configs
+		Config* config = Config::GetInstance();
+		config->LoadSetting();
 
         //仮想デバイスを準備
         m_devices.resize(58); //58デバイス(全合計64に満たないくらい)
@@ -130,7 +131,7 @@ namespace VMTDriver {
         for (int i = 0; i < m_devices.size(); i++)
         {
             //シリアル番号を準備
-            string name = Config::GetInstance()->GetSerialPrefix();
+            string name = config->GetSerialPrefix();
 			name.append("_");
             name.append(std::to_string(i));
             m_devices[i].SetDeviceSerial(name);
@@ -141,7 +142,7 @@ namespace VMTDriver {
 
 		{
 			//シリアル番号を準備
-			string name = Config::GetInstance()->GetSerialPrefix();
+			string name = config->GetSerialPrefix();
 			name.append("_HMD");
 			m_hmd[0].SetDeviceSerial(name);
 
@@ -177,20 +178,33 @@ namespace VMTDriver {
     //OpenVRからのフレーム処理
     void ServerTrackedDeviceProvider::RunFrame()
     {
+		//Open communication after initialization and first frame.
+		//We dont want to receive data while initialization.
+		CommunicationManager::GetInstance()->Open();
+
         //通信の毎フレーム処理をする
         CommunicationManager::GetInstance()->Process();
 
+		size_t size = m_devices.size();
+
         //OpenVRイベントの取得
         VREvent_t VREvent;
-        VRServerDriverHost()->PollNextEvent(&VREvent, sizeof(VREvent_t));
+		while (VRServerDriverHost()->PollNextEvent(&VREvent, sizeof(VREvent_t)))
+		{
+			//各仮想デバイスのイベントを処理
+			for (int i = 0; i < size; i++)
+			{
+				m_devices[i].ProcessEvent(VREvent);
+			}
+			m_hmd[0].ProcessEvent(VREvent);
+		}
 
         //各仮想デバイスのイベントを処理
-		size_t size = m_devices.size();
         for (int i = 0; i < size; i++)
         {
-            m_devices[i].ProcessEvent(VREvent);
+			m_devices[i].RunFrame();
         }
-		m_hmd[0].ProcessEvent(VREvent);
+		m_hmd[0].RunFrame();
     }
 
     //OpenVRからのスタンバイブロック問い合わせ
